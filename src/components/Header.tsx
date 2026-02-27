@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useUserStore } from "@/lib/store";
 
 export default function Header() {
+  const router = useRouter();
   const { points, isLoggedIn, name, login, logout, fetchMe } = useUserStore();
 
   useEffect(() => {
@@ -27,10 +29,10 @@ export default function Header() {
             </span>
             <span className="text-xs text-gray-500 hidden sm:inline">{name}</span>
             <button
-              onClick={logout}
+              onClick={() => router.push("/mypage")}
               className="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full hover:bg-gray-200 transition"
             >
-              로그아웃
+              마이
             </button>
           </>
         ) : (
