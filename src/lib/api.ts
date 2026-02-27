@@ -1,8 +1,9 @@
-import type { MapBounds, Restaurant, Category } from "@/types";
+import type { MapBounds, Restaurant, Category, Source } from "@/types";
 
 export async function fetchRestaurants(
   bounds: MapBounds,
-  category?: Category | null
+  category?: Category | null,
+  source?: Source | null
 ): Promise<{ restaurants: Restaurant[]; total: number }> {
   const params = new URLSearchParams({
     swLat: bounds.sw.lat.toString(),
@@ -11,9 +12,8 @@ export async function fetchRestaurants(
     neLng: bounds.ne.lng.toString(),
   });
 
-  if (category) {
-    params.set("category", category);
-  }
+  if (category) params.set("category", category);
+  if (source && source !== "all") params.set("source", source);
 
   const res = await fetch(`/api/map/restaurants?${params}`);
   if (!res.ok) throw new Error("Failed to fetch restaurants");

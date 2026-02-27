@@ -33,6 +33,12 @@ function LockedCard({ restaurant }: { restaurant: LockedRestaurant }) {
   );
 }
 
+const SOURCE_BADGE: Record<string, string> = {
+  assembly: "🏛️ 국회의원",
+  seoul_expense: "🏙️ 서울시",
+  user: "👤 유저",
+};
+
 function UnlockedCard({ restaurant }: { restaurant: UnlockedRestaurant }) {
   return (
     <div className="flex items-center gap-3 p-3 bg-orange-50 border border-orange-100 rounded-xl">
@@ -45,6 +51,11 @@ function UnlockedCard({ restaurant }: { restaurant: UnlockedRestaurant }) {
         </p>
         <p className="text-xs text-gray-500 truncate">{restaurant.address}</p>
         <div className="flex items-center gap-1.5 mt-0.5">
+          {restaurant.source && (
+            <span className="text-[10px] bg-white text-gray-500 px-1.5 py-0.5 rounded">
+              {SOURCE_BADGE[restaurant.source] || restaurant.source}
+            </span>
+          )}
           {restaurant.category && (
             <span className="text-[10px] bg-white text-gray-500 px-1.5 py-0.5 rounded">
               {CATEGORY_LABELS[restaurant.category]}

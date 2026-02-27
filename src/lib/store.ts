@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { MapBounds, Restaurant, Category } from "@/types";
+import type { MapBounds, Restaurant, Category, Source } from "@/types";
 
 interface MapState {
   bounds: MapBounds | null;
@@ -23,10 +23,12 @@ interface RestaurantState {
   restaurants: Restaurant[];
   selectedId: string | null;
   categoryFilter: Category | null;
+  sourceFilter: Source;
   isLoading: boolean;
   setRestaurants: (restaurants: Restaurant[]) => void;
   setSelectedId: (id: string | null) => void;
   setCategoryFilter: (category: Category | null) => void;
+  setSourceFilter: (source: Source) => void;
   setLoading: (loading: boolean) => void;
 }
 
@@ -34,10 +36,12 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
   restaurants: [],
   selectedId: null,
   categoryFilter: null,
+  sourceFilter: "all",
   isLoading: false,
   setRestaurants: (restaurants) => set({ restaurants }),
   setSelectedId: (id) => set({ selectedId: id }),
   setCategoryFilter: (category) => set({ categoryFilter: category }),
+  setSourceFilter: (source) => set({ sourceFilter: source }),
   setLoading: (loading) => set({ isLoading: loading }),
 }));
 

@@ -14,13 +14,13 @@ export default function KakaoMap() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const { setBounds, setCenter, setLevel } = useMapStore();
-  const { setRestaurants, setLoading, categoryFilter } = useRestaurantStore();
+  const { setRestaurants, setLoading, categoryFilter, sourceFilter } = useRestaurantStore();
 
   const loadRestaurants = useCallback(
     async (bounds: { sw: { lat: number; lng: number }; ne: { lat: number; lng: number } }) => {
       setLoading(true);
       try {
-        const data = await fetchRestaurants(bounds, categoryFilter);
+        const data = await fetchRestaurants(bounds, categoryFilter, sourceFilter);
         setRestaurants(data.restaurants);
       } catch (err) {
         console.error("Failed to load restaurants:", err);
@@ -28,7 +28,7 @@ export default function KakaoMap() {
         setLoading(false);
       }
     },
-    [categoryFilter, setRestaurants, setLoading]
+    [categoryFilter, sourceFilter, setRestaurants, setLoading]
   );
 
   useEffect(() => {
@@ -101,7 +101,7 @@ export default function KakaoMap() {
       sw: { lat: sw.getLat(), lng: sw.getLng() },
       ne: { lat: ne.getLat(), lng: ne.getLng() },
     });
-  }, [categoryFilter, loadRestaurants]);
+  }, [categoryFilter, sourceFilter, loadRestaurants]);
 
   return (
     <div

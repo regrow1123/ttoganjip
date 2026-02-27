@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/index";
 import { restaurants, restaurantStats, unlocks } from "@/db/schema";
-import { and, gte, lte, eq, sql } from "drizzle-orm";
+import { and, gte, lte, eq, sql, inArray } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   const params = req.nextUrl.searchParams;
@@ -10,13 +10,13 @@ export async function GET(req: NextRequest) {
   const neLat = parseFloat(params.get("neLat") || "0");
   const neLng = parseFloat(params.get("neLng") || "0");
   const category = params.get("category") || null;
-  const userId = params.get("userId") || null; // TODO: 세션에서 가져오기
+  const source = params.get("source") || null; // 'all' | 'assembly' | 'seoul_expense' | 'user'
+  const userId = params.get("userId") || null;
 
   if (!swLat || !neLat) {
     return NextResponse.json({ error: "bounds required" }, { status: 400 });
   }
 
-  // 뷰포트 내 재방문 2회+ 식당 조회
   const conditions = [
     gte(restaurants.lat, swLat),
     lte(restaurants.lat, neLat),
@@ -29,6 +29,16 @@ export async function GET(req: NextRequest) {
     conditions.push(eq(restaurants.category, category));
   }
 
+  // source 필터
+  if (source && source !== "all") {
+    if (source === "public") {
+      // 공공 데이터 전체 (국회의원 + 서울시)
+      conditions.push(inArray(restaurants.source, ["assembly", "seoul_expense"]));
+    } else {
+      conditions.push(eq(restaurants.source, source));
+    }
+  }
+
   const rows = await db
     .select({
       id: restaurants.id,
@@ -38,6 +48,7 @@ export async function GET(req: NextRequest) {
       lat: restaurants.lat,
       lng: restaurants.lng,
       region: restaurants.region,
+      source: restaurants.source,
       totalVisits: restaurantStats.totalVisits,
       maxRevisits: restaurantStats.maxRevisits,
     })
@@ -47,7 +58,6 @@ export async function GET(req: NextRequest) {
     .orderBy(sql`${restaurantStats.totalVisits} desc`)
     .limit(100);
 
-  // 유저가 로그인한 경우 unlock 여부 확인
   let unlockedIds = new Set<string>();
   if (userId) {
     const userUnlocks = await db
@@ -57,9 +67,10 @@ export async function GET(req: NextRequest) {
     unlockedIds = new Set(userUnlocks.map((u) => u.restaurantId));
   }
 
-  // 잠금/해제 상태에 따라 응답 분기
   const result = rows.map((r) => {
-    const isUnlocked = unlockedIds.has(r.id);
+    // 공공 데이터는 무료 열람 (잠금 없음)
+    const isPublic = r.source === "assembly" || r.source === "seoul_expense";
+    const isUnlocked = isPublic || unlockedIds.has(r.id);
 
     if (isUnlocked) {
       return {
@@ -69,6 +80,7 @@ export async function GET(req: NextRequest) {
         category: r.category,
         location: { lat: r.lat, lng: r.lng },
         revisitScore: r.totalVisits,
+        source: r.source,
         locked: false,
       };
     }
@@ -78,6 +90,7 @@ export async function GET(req: NextRequest) {
       category: r.category,
       revisitScore: r.totalVisits,
       areaHint: r.region || "서울",
+      source: r.source,
       locked: true,
     };
   });

@@ -36,6 +36,7 @@ export const restaurants = pgTable("restaurants", {
   lng: doublePrecision("lng").notNull(),
   placeId: varchar("place_id", { length: 100 }), // 외부 지도 API 장소 ID
   region: varchar("region", { length: 100 }), // 대략적 지역명 (잠금 상태 힌트)
+  source: varchar("source", { length: 30 }).default("user").notNull(), // 'user' | 'assembly' | 'seoul_expense'
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
