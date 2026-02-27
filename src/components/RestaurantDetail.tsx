@@ -54,12 +54,12 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
       <div className="bg-white dark:bg-gray-800 w-full sm:w-[420px] sm:max-h-[80vh] max-h-[75vh] sm:rounded-2xl rounded-t-2xl overflow-hidden animate-slide-up flex flex-col">
         {/* 헤더 */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700">
-          <h2 className="text-base font-bold text-gray-900">
+          <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">
             {loading ? "로딩 중..." : data?.locked ? "🔒 잠긴 맛집" : data?.name || "맛집 정보"}
           </h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+            className="w-8 h-8 flex items-center justify-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100"
           >
             ✕
           </button>
@@ -75,7 +75,7 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
 
           {!loading && data?.locked && (
             <div className="flex flex-col items-center gap-4 py-8">
-              <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center">
+              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center">
                 <span className="text-3xl">🔒</span>
               </div>
               <div className="text-center">
@@ -106,7 +106,7 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-gray-600">{data.address}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">{data.address}</p>
                 <p className="text-base font-bold text-orange-500">🔥 {data.totalVisits}회 재방문</p>
               </div>
 
@@ -132,16 +132,16 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
                     {data.expenses.map((e, i) => (
                       <div
                         key={i}
-                        className="bg-gray-50 rounded-lg p-3 text-xs"
+                        className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-xs"
                       >
                         <div className="flex items-center justify-between mb-1">
                           <span className="font-medium text-gray-700">
                             {e.memberName} ({e.party})
                           </span>
-                          <span className="text-gray-400">{e.date}</span>
+                          <span className="text-gray-400 dark:text-gray-500">{e.date}</span>
                         </div>
                         {e.amount && (
-                          <span className="text-gray-500">
+                          <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">
                             {e.amount.toLocaleString()}원
                           </span>
                         )}

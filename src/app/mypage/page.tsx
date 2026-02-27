@@ -83,7 +83,7 @@ export default function MyPage() {
         </div>
 
         <div className="grid grid-cols-3 gap-3">
-          <div className="text-center bg-orange-50 rounded-xl p-3">
+          <div className="text-center bg-orange-50 dark:bg-orange-900/30 rounded-xl p-3">
             <p className="text-lg font-bold text-orange-500">{data.user.points}</p>
             <p className="text-[10px] text-gray-500">보유 포인트</p>
           </div>
@@ -119,11 +119,11 @@ export default function MyPage() {
       </div>
 
       {/* 탭 */}
-      <div className="flex gap-1 mx-4 bg-gray-100 rounded-xl p-1">
+      <div className="flex gap-1 mx-4 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
         <button
           onClick={() => setTab("unlocked")}
           className={`flex-1 py-2 text-xs font-medium rounded-lg transition ${
-            tab === "unlocked" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
+            tab === "unlocked" ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" : "text-gray-500 dark:text-gray-400"
           }`}
         >
           🔓 열람 기록 ({data.unlockedRestaurants.length})
@@ -131,7 +131,7 @@ export default function MyPage() {
         <button
           onClick={() => setTab("points")}
           className={`flex-1 py-2 text-xs font-medium rounded-lg transition ${
-            tab === "points" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
+            tab === "points" ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" : "text-gray-500 dark:text-gray-400"
           }`}
         >
           💰 포인트 내역
