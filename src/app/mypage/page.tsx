@@ -150,12 +150,15 @@ export default function MyPage() {
             ) : (
               data.unlockedRestaurants.map((r) => (
                 <div key={r.restaurantId} className="bg-white dark:bg-gray-800 p-3 rounded-xl flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-50 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
-                    <span className="text-lg">🍽️</span>
-                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{r.name}</p>
                     <div className="flex items-center gap-1.5 mt-0.5">
+                      {r.source && (
+                        <span className="text-[10px] text-gray-400 dark:text-gray-400">
+                          {SOURCE_LABEL[r.source] || r.source}
+                        </span>
+                      )}
+                      <span className="text-[10px] text-gray-300 dark:text-gray-600">•</span>
                       <span className="text-[10px] text-gray-400 dark:text-gray-400">
                         {r.category ? CATEGORY_LABELS[r.category] : "음식점"}
                       </span>
