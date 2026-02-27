@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useMapStore } from "@/lib/store";
+import { useEffect, useRef, useCallback } from "react";
+import { useMapStore, useRestaurantStore } from "@/lib/store";
+import { fetchRestaurants } from "@/lib/api";
 
 declare global {
   interface Window {
@@ -11,8 +12,24 @@ declare global {
 
 export default function KakaoMap() {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<any>(null);
+  const mapInstance = useRef<any>(null);
   const { setBounds, setCenter, setLevel } = useMapStore();
+  const { setRestaurants, setLoading, categoryFilter } = useRestaurantStore();
+
+  const loadRestaurants = useCallback(
+    async (bounds: { sw: { lat: number; lng: number }; ne: { lat: number; lng: number } }) => {
+      setLoading(true);
+      try {
+        const data = await fetchRestaurants(bounds, categoryFilter);
+        setRestaurants(data.restaurants);
+      } catch (err) {
+        console.error("Failed to load restaurants:", err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [categoryFilter, setRestaurants, setLoading]
+  );
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -24,27 +41,45 @@ export default function KakaoMap() {
         if (!mapRef.current) return;
 
         const options = {
-          center: new window.kakao.maps.LatLng(37.5665, 126.978), // 서울 시청
+          center: new window.kakao.maps.LatLng(37.5665, 126.978),
           level: 5,
         };
 
         const kakaoMap = new window.kakao.maps.Map(mapRef.current, options);
-        setMap(kakaoMap);
+        mapInstance.current = kakaoMap;
 
-        // 지도 이동 시 bounds 업데이트
+        // 지도 이동 완료 시 데이터 로드
+        let debounceTimer: NodeJS.Timeout;
         window.kakao.maps.event.addListener(kakaoMap, "idle", () => {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
+            const bounds = kakaoMap.getBounds();
+            const sw = bounds.getSouthWest();
+            const ne = bounds.getNorthEast();
+            const center = kakaoMap.getCenter();
+
+            const boundsObj = {
+              sw: { lat: sw.getLat(), lng: sw.getLng() },
+              ne: { lat: ne.getLat(), lng: ne.getLng() },
+            };
+
+            setBounds(boundsObj);
+            setCenter({ lat: center.getLat(), lng: center.getLng() });
+            setLevel(kakaoMap.getLevel());
+            loadRestaurants(boundsObj);
+          }, 300);
+        });
+
+        // 초기 로드
+        setTimeout(() => {
           const bounds = kakaoMap.getBounds();
           const sw = bounds.getSouthWest();
           const ne = bounds.getNorthEast();
-          const center = kakaoMap.getCenter();
-
-          setBounds({
+          loadRestaurants({
             sw: { lat: sw.getLat(), lng: sw.getLng() },
             ne: { lat: ne.getLat(), lng: ne.getLng() },
           });
-          setCenter({ lat: center.getLat(), lng: center.getLng() });
-          setLevel(kakaoMap.getLevel());
-        });
+        }, 500);
       });
     };
 
@@ -53,7 +88,20 @@ export default function KakaoMap() {
     return () => {
       script.remove();
     };
-  }, [setBounds, setCenter, setLevel]);
+  }, [setBounds, setCenter, setLevel, loadRestaurants]);
+
+  // 카테고리 필터 변경 시 다시 로드
+  useEffect(() => {
+    if (!mapInstance.current) return;
+    const bounds = mapInstance.current.getBounds();
+    if (!bounds) return;
+    const sw = bounds.getSouthWest();
+    const ne = bounds.getNorthEast();
+    loadRestaurants({
+      sw: { lat: sw.getLat(), lng: sw.getLng() },
+      ne: { lat: ne.getLat(), lng: ne.getLng() },
+    });
+  }, [categoryFilter, loadRestaurants]);
 
   return (
     <div
