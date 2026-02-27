@@ -6,6 +6,7 @@ import { unlockRestaurant } from "@/lib/api";
 import { CATEGORY_LABELS } from "@/types";
 import type { LockedRestaurant, UnlockedRestaurant } from "@/types";
 import UnlockModal from "./UnlockModal";
+import RestaurantDetail from "./RestaurantDetail";
 
 function LockedCard({ restaurant, onUnlock }: { restaurant: LockedRestaurant; onUnlock: (id: string) => void }) {
   return (
@@ -45,9 +46,9 @@ const SOURCE_BADGE: Record<string, string> = {
   user: "👤 유저",
 };
 
-function UnlockedCard({ restaurant }: { restaurant: UnlockedRestaurant }) {
+function UnlockedCard({ restaurant, onClick }: { restaurant: UnlockedRestaurant; onClick: () => void }) {
   return (
-    <div className="flex items-center gap-3 p-3 bg-orange-50 border border-orange-100 rounded-xl">
+    <div onClick={onClick} className="flex items-center gap-3 p-3 bg-orange-50 border border-orange-100 rounded-xl cursor-pointer hover:border-orange-200 transition">
       <div className="flex-shrink-0 w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
         <span className="text-lg">🍽️</span>
       </div>
@@ -80,6 +81,7 @@ export default function RestaurantList() {
   const { restaurants, isLoading, setRestaurants } = useRestaurantStore();
   const { userId, isLoggedIn, points, setPoints, login } = useUserStore();
   const [unlockTarget, setUnlockTarget] = useState<LockedRestaurant | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
 
   const handleUnlockClick = (restaurantId: string) => {
     if (!isLoggedIn) {
@@ -151,8 +153,15 @@ export default function RestaurantList() {
         r.locked ? (
           <LockedCard key={r.id} restaurant={r} onUnlock={handleUnlockClick} />
         ) : (
-          <UnlockedCard key={r.id} restaurant={r} />
+          <UnlockedCard key={r.id} restaurant={r} onClick={() => setDetailId(r.id)} />
         )
+      )}
+
+      {detailId && (
+        <RestaurantDetail
+          restaurantId={detailId}
+          onClose={() => setDetailId(null)}
+        />
       )}
 
       {unlockTarget && (
