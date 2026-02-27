@@ -51,9 +51,9 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
       className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white w-full sm:w-[420px] sm:max-h-[80vh] max-h-[75vh] sm:rounded-2xl rounded-t-2xl overflow-hidden animate-slide-up flex flex-col">
+      <div className="bg-white dark:bg-gray-800 w-full sm:w-[420px] sm:max-h-[80vh] max-h-[75vh] sm:rounded-2xl rounded-t-2xl overflow-hidden animate-slide-up flex flex-col">
         {/* 헤더 */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-100">
+        <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700">
           <h2 className="text-base font-bold text-gray-900">
             {loading ? "로딩 중..." : data?.locked ? "🔒 잠긴 맛집" : data?.name || "맛집 정보"}
           </h2>

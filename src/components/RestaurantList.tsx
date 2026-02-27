@@ -10,24 +10,20 @@ import RestaurantDetail from "./RestaurantDetail";
 
 function LockedCard({ restaurant, onUnlock }: { restaurant: LockedRestaurant; onUnlock: (id: string) => void }) {
   return (
-    <div className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-xl hover:border-orange-200 transition">
-      <div className="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+    <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl hover:border-orange-200 dark:hover:border-orange-800 transition">
+      <div className="flex-shrink-0 w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
         <span className="text-lg">🔒</span>
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="text-xs font-medium text-gray-500">
-            {restaurant.category
-              ? CATEGORY_LABELS[restaurant.category]
-              : "음식점"}
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+            {restaurant.category ? CATEGORY_LABELS[restaurant.category] : "음식점"}
           </span>
-          <span className="text-[10px] text-gray-300">•</span>
-          <span className="text-xs text-gray-400">{restaurant.areaHint}</span>
+          <span className="text-[10px] text-gray-300 dark:text-gray-600">•</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500">{restaurant.areaHint}</span>
         </div>
         <div className="flex items-center gap-1 mt-0.5">
-          <span className="text-xs font-semibold text-orange-500">
-            🔥 {restaurant.revisitScore}회 재방문
-          </span>
+          <span className="text-xs font-semibold text-orange-500">🔥 {restaurant.revisitScore}회 재방문</span>
         </div>
       </div>
       <button
@@ -48,29 +44,25 @@ const SOURCE_BADGE: Record<string, string> = {
 
 function UnlockedCard({ restaurant, onClick }: { restaurant: UnlockedRestaurant; onClick: () => void }) {
   return (
-    <div onClick={onClick} className="flex items-center gap-3 p-3 bg-orange-50 border border-orange-100 rounded-xl cursor-pointer hover:border-orange-200 transition">
-      <div className="flex-shrink-0 w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+    <div onClick={onClick} className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800/30 rounded-xl cursor-pointer hover:border-orange-200 dark:hover:border-orange-700 transition">
+      <div className="flex-shrink-0 w-10 h-10 bg-orange-100 dark:bg-orange-800/30 rounded-lg flex items-center justify-center">
         <span className="text-lg">🍽️</span>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-gray-900 truncate">
-          {restaurant.name}
-        </p>
-        <p className="text-xs text-gray-500 truncate">{restaurant.address}</p>
+        <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{restaurant.name}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{restaurant.address}</p>
         <div className="flex items-center gap-1.5 mt-0.5">
           {restaurant.source && (
-            <span className="text-[10px] bg-white text-gray-500 px-1.5 py-0.5 rounded">
+            <span className="text-[10px] bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded">
               {SOURCE_BADGE[restaurant.source] || restaurant.source}
             </span>
           )}
           {restaurant.category && (
-            <span className="text-[10px] bg-white text-gray-500 px-1.5 py-0.5 rounded">
+            <span className="text-[10px] bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded">
               {CATEGORY_LABELS[restaurant.category]}
             </span>
           )}
-          <span className="text-xs font-semibold text-orange-500">
-            🔥 {restaurant.revisitScore}회
-          </span>
+          <span className="text-xs font-semibold text-orange-500">🔥 {restaurant.revisitScore}회</span>
         </div>
       </div>
     </div>
@@ -84,7 +76,6 @@ export default function RestaurantList() {
   const { selectedId, setSelectedId } = useRestaurantStore();
   const [detailId, setDetailId] = useState<string | null>(null);
 
-  // 지도 마커 클릭 시 상세 모달 열기
   useEffect(() => {
     if (selectedId) {
       setDetailId(selectedId);
@@ -93,47 +84,30 @@ export default function RestaurantList() {
   }, [selectedId, setSelectedId]);
 
   const handleUnlockClick = (restaurantId: string) => {
-    if (!isLoggedIn) {
-      login();
-      return;
-    }
+    if (!isLoggedIn) { login(); return; }
     const target = restaurants.find((r) => r.id === restaurantId && r.locked);
     if (target && target.locked) setUnlockTarget(target);
   };
 
   const handleConfirmUnlock = async () => {
     if (!unlockTarget || !userId) throw new Error("로그인이 필요합니다");
-
     const result = await unlockRestaurant(unlockTarget.id, userId);
     if (result.error) throw new Error(result.error);
-
     setRestaurants(
       restaurants.map((r) =>
         r.id === unlockTarget.id
-          ? {
-              id: result.restaurant.id,
-              name: result.restaurant.name,
-              address: result.restaurant.address,
-              category: result.restaurant.category,
-              location: { lat: result.restaurant.lat, lng: result.restaurant.lng },
-              revisitScore: r.revisitScore,
-              source: (r as any).source,
-              locked: false as const,
-            }
+          ? { id: result.restaurant.id, name: result.restaurant.name, address: result.restaurant.address, category: result.restaurant.category, location: { lat: result.restaurant.lat, lng: result.restaurant.lng }, revisitScore: r.revisitScore, source: (r as any).source, locked: false as const }
           : r
       )
     );
-
-    if (result.remainingPoints !== undefined) {
-      setPoints(result.remainingPoints);
-    }
+    if (result.remainingPoints !== undefined) setPoints(result.remainingPoints);
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
         <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm text-gray-400 ml-2">로딩 중...</span>
+        <span className="text-sm text-gray-400 dark:text-gray-500 ml-2">로딩 중...</span>
       </div>
     );
   }
@@ -142,10 +116,8 @@ export default function RestaurantList() {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4">
         <span className="text-3xl mb-2">🗺️</span>
-        <p className="text-sm text-gray-400 text-center">
-          이 지역에 등록된 재방문 맛집이 없어요.
-          <br />
-          지도를 이동해보세요!
+        <p className="text-sm text-gray-400 dark:text-gray-500 text-center">
+          이 지역에 등록된 재방문 맛집이 없어요.<br />지도를 이동해보세요!
         </p>
       </div>
     );
@@ -154,9 +126,7 @@ export default function RestaurantList() {
   return (
     <div className="flex flex-col gap-2 px-4 pb-4">
       <div className="flex items-center justify-between py-1">
-        <h2 className="text-xs font-semibold text-gray-400">
-          재방문 맛집 {restaurants.length}곳
-        </h2>
+        <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500">재방문 맛집 {restaurants.length}곳</h2>
       </div>
       {restaurants.map((r) =>
         r.locked ? (
@@ -165,21 +135,9 @@ export default function RestaurantList() {
           <UnlockedCard key={r.id} restaurant={r} onClick={() => setDetailId(r.id)} />
         )
       )}
-
-      {detailId && (
-        <RestaurantDetail
-          restaurantId={detailId}
-          onClose={() => setDetailId(null)}
-        />
-      )}
-
+      {detailId && <RestaurantDetail restaurantId={detailId} onClose={() => setDetailId(null)} />}
       {unlockTarget && (
-        <UnlockModal
-          restaurant={unlockTarget}
-          userPoints={points}
-          onConfirm={handleConfirmUnlock}
-          onClose={() => setUnlockTarget(null)}
-        />
+        <UnlockModal restaurant={unlockTarget} userPoints={points} onConfirm={handleConfirmUnlock} onClose={() => setUnlockTarget(null)} />
       )}
     </div>
   );

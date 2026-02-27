@@ -40,7 +40,7 @@ export default function UnlockModal({
       className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && status !== "loading" && onClose()}
     >
-      <div className="bg-white w-full sm:w-[360px] sm:rounded-2xl rounded-t-2xl p-5 pb-8 sm:pb-5 animate-slide-up">
+      <div className="bg-white dark:bg-gray-800 w-full sm:w-[360px] sm:rounded-2xl rounded-t-2xl p-5 pb-8 sm:pb-5 animate-slide-up">
         {status === "confirm" && (
           <>
             <div className="flex flex-col items-center gap-3 mb-5">

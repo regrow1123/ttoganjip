@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CATEGORY_LABELS, type Category } from "@/types";
+import { useThemeStore } from "@/lib/theme";
 
 const POINT_TYPE_LABELS: Record<string, string> = {
   unlock: "🔓 맛집 열람",
@@ -37,6 +38,7 @@ export default function MyPage() {
   const [data, setData] = useState<MyPageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"unlocked" | "points">("unlocked");
+  const { mode, setMode } = useThemeStore();
 
   useEffect(() => {
     fetch("/api/users/me")
@@ -59,9 +61,9 @@ export default function MyPage() {
   if (!data) return null;
 
   return (
-    <div className="min-h-dvh bg-gray-50">
+    <div className="min-h-dvh bg-gray-50 dark:bg-gray-950">
       {/* 헤더 */}
-      <header className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3">
+      <header className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-4 py-3 flex items-center gap-3">
         <button onClick={() => router.push("/")} className="text-gray-400 hover:text-gray-600">
           ← 
         </button>
@@ -69,7 +71,7 @@ export default function MyPage() {
       </header>
 
       {/* 프로필 카드 */}
-      <div className="bg-white m-4 p-5 rounded-2xl shadow-sm">
+      <div className="bg-white dark:bg-gray-800 m-4 p-5 rounded-2xl shadow-sm">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
             <span className="text-xl">👤</span>
@@ -93,6 +95,26 @@ export default function MyPage() {
             <p className="text-lg font-bold text-gray-700">{data.stats.totalSpent}P</p>
             <p className="text-[10px] text-gray-500">사용한 포인트</p>
           </div>
+        </div>
+      </div>
+
+      {/* 테마 설정 */}
+      <div className="bg-white dark:bg-gray-800 mx-4 mb-4 p-4 rounded-2xl shadow-sm">
+        <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-2">테마 설정</h3>
+        <div className="flex gap-2">
+          {([["system", "🖥️ 시스템"], ["light", "☀️ 밝게"], ["dark", "🌙 어둡게"]] as const).map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setMode(key)}
+              className={`flex-1 py-2 text-xs font-medium rounded-lg transition ${
+                mode === key
+                  ? "bg-orange-500 text-white"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -127,7 +149,7 @@ export default function MyPage() {
               </div>
             ) : (
               data.unlockedRestaurants.map((r) => (
-                <div key={r.restaurantId} className="bg-white p-3 rounded-xl flex items-center gap-3">
+                <div key={r.restaurantId} className="bg-white dark:bg-gray-800 p-3 rounded-xl flex items-center gap-3">
                   <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
                     <span className="text-lg">🍽️</span>
                   </div>
@@ -167,7 +189,7 @@ export default function MyPage() {
               </div>
             ) : (
               data.pointHistory.map((p, i) => (
-                <div key={i} className="bg-white p-3 rounded-xl flex items-center justify-between">
+                <div key={i} className="bg-white dark:bg-gray-800 p-3 rounded-xl flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-700">
                       {POINT_TYPE_LABELS[p.type] || p.type}
