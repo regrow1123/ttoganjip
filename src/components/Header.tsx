@@ -38,7 +38,7 @@ export default function Header() {
             onClick={login}
             className="text-xs bg-orange-500 text-white px-3 py-1.5 rounded-full hover:bg-orange-600 transition font-medium"
           >
-            체험 로그인
+            로그인
           </button>
         )}
       </div>
