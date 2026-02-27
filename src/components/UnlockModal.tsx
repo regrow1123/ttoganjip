@@ -48,7 +48,7 @@ export default function UnlockModal({
                 <span className="text-2xl">🔓</span>
               </div>
               <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">맛집 정보를 확인할까요?</h3>
-              <p className="text-sm text-gray-500 text-center">
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
                 {restaurant.areaHint} · {restaurant.category || "음식점"} · 🔥 {restaurant.revisitScore}회 재방문
               </p>
             </div>

@@ -79,12 +79,12 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
                 <span className="text-3xl">🔒</span>
               </div>
               <div className="text-center">
-                <p className="text-sm text-gray-500 mb-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
                   {data.category ? CATEGORY_LABELS[data.category] : "음식점"} · {data.region || "서울"}
                 </p>
                 <p className="text-lg font-bold text-orange-500">🔥 {data.totalVisits}회 재방문</p>
               </div>
-              <p className="text-xs text-gray-400 text-center">
+              <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
                 잠금을 해제하면 상호명, 주소, 상세 정보를 확인할 수 있어요
               </p>
             </div>
@@ -101,7 +101,7 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
                     </span>
                   )}
                   {data.category && (
-                    <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full">
                       {CATEGORY_LABELS[data.category]}
                     </span>
                   )}
@@ -125,7 +125,7 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
               {/* 국회의원 업무추진비 내역 */}
               {data.expenses && data.expenses.length > 0 && (
                 <div className="mt-2">
-                  <h3 className="text-xs font-semibold text-gray-400 mb-2">
+                  <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-2">
                     📋 업무추진비 사용 내역 ({data.expenses.length}건)
                   </h3>
                   <div className="flex flex-col gap-2">
@@ -135,7 +135,7 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
                         className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-xs"
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <span className="font-medium text-gray-700">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">
                             {e.memberName} ({e.party})
                           </span>
                           <span className="text-gray-400 dark:text-gray-500">{e.date}</span>
@@ -146,7 +146,7 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
                           </span>
                         )}
                         {e.purpose && (
-                          <p className="text-gray-400 mt-1">{e.purpose}</p>
+                          <p className="text-gray-400 dark:text-gray-500 mt-1">{e.purpose}</p>
                         )}
                       </div>
                     ))}
