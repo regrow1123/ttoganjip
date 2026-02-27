@@ -68,9 +68,7 @@ export async function GET(req: NextRequest) {
   }
 
   const result = rows.map((r) => {
-    // 공공 데이터는 무료 열람 (잠금 없음)
-    const isPublic = r.source === "assembly" || r.source === "seoul_expense";
-    const isUnlocked = isPublic || unlockedIds.has(r.id);
+    const isUnlocked = unlockedIds.has(r.id);
 
     if (isUnlocked) {
       return {
