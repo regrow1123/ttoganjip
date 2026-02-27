@@ -67,7 +67,7 @@ export default function MyPage() {
         <button onClick={() => router.push("/")} className="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:text-gray-600">
           ← 
         </button>
-        <h1 className="text-base font-bold">마이페이지</h1>
+        <h1 className="text-base font-bold text-gray-900 dark:text-gray-100">마이페이지</h1>
       </header>
 
       {/* 프로필 카드 */}
@@ -188,7 +188,7 @@ export default function MyPage() {
               data.pointHistory.map((p, i) => (
                 <div key={i} className="bg-white dark:bg-gray-800 p-3 rounded-xl flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-700 dark:text-gray-200">
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
                       {POINT_TYPE_LABELS[p.type] || p.type}
                     </p>
                     <p className="text-[10px] text-gray-400 dark:text-gray-400">
