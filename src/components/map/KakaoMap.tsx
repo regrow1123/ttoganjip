@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useMapStore, useRestaurantStore } from "@/lib/store";
 import { fetchRestaurants } from "@/lib/api";
+import type { Restaurant } from "@/types";
 
 declare global {
   interface Window {
@@ -13,8 +14,69 @@ declare global {
 export default function KakaoMap() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
+  const overlaysRef = useRef<any[]>([]);
   const { setBounds, setCenter, setLevel } = useMapStore();
-  const { setRestaurants, setLoading, categoryFilter, sourceFilter } = useRestaurantStore();
+  const { restaurants, setRestaurants, setLoading, setSelectedId, categoryFilter, sourceFilter } =
+    useRestaurantStore();
+
+  // 마커 전부 제거
+  const clearMarkers = useCallback(() => {
+    markersRef.current.forEach((m) => m.setMap(null));
+    overlaysRef.current.forEach((o) => o.setMap(null));
+    markersRef.current = [];
+    overlaysRef.current = [];
+  }, []);
+
+  // 잠금 해제된 식당만 마커 표시
+  const renderMarkers = useCallback(
+    (items: Restaurant[]) => {
+      if (!mapInstance.current || !window.kakao) return;
+      clearMarkers();
+
+      const unlocked = items.filter((r) => !r.locked && "location" in r);
+
+      unlocked.forEach((r) => {
+        if (r.locked || !("location" in r)) return;
+
+        const position = new window.kakao.maps.LatLng(r.location.lat, r.location.lng);
+
+        // 커스텀 오버레이 (마커 대신)
+        const content = document.createElement("div");
+        content.innerHTML = `
+          <div style="
+            background: #FF6B35;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transform: translateY(-50%);
+            border: 2px solid white;
+          ">
+            🔥 ${r.name}
+          </div>
+        `;
+
+        content.addEventListener("click", () => {
+          setSelectedId(r.id);
+        });
+
+        const overlay = new window.kakao.maps.CustomOverlay({
+          position,
+          content,
+          yAnchor: 1.3,
+        });
+
+        overlay.setMap(mapInstance.current);
+        overlaysRef.current.push(overlay);
+      });
+    },
+    [clearMarkers, setSelectedId]
+  );
 
   const loadRestaurants = useCallback(
     async (bounds: { sw: { lat: number; lng: number }; ne: { lat: number; lng: number } }) => {
@@ -48,7 +110,6 @@ export default function KakaoMap() {
         const kakaoMap = new window.kakao.maps.Map(mapRef.current, options);
         mapInstance.current = kakaoMap;
 
-        // 지도 이동 완료 시 데이터 로드
         let debounceTimer: NodeJS.Timeout;
         window.kakao.maps.event.addListener(kakaoMap, "idle", () => {
           clearTimeout(debounceTimer);
@@ -70,7 +131,6 @@ export default function KakaoMap() {
           }, 300);
         });
 
-        // 초기 로드
         setTimeout(() => {
           const bounds = kakaoMap.getBounds();
           const sw = bounds.getSouthWest();
@@ -84,13 +144,15 @@ export default function KakaoMap() {
     };
 
     document.head.appendChild(script);
-
-    return () => {
-      script.remove();
-    };
+    return () => { script.remove(); };
   }, [setBounds, setCenter, setLevel, loadRestaurants]);
 
-  // 카테고리 필터 변경 시 다시 로드
+  // restaurants 변경 시 마커 업데이트
+  useEffect(() => {
+    renderMarkers(restaurants);
+  }, [restaurants, renderMarkers]);
+
+  // 필터 변경 시 다시 로드
   useEffect(() => {
     if (!mapInstance.current) return;
     const bounds = mapInstance.current.getBounds();

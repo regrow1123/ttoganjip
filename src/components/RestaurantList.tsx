@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRestaurantStore, useUserStore } from "@/lib/store";
 import { unlockRestaurant } from "@/lib/api";
 import { CATEGORY_LABELS } from "@/types";
@@ -81,7 +81,16 @@ export default function RestaurantList() {
   const { restaurants, isLoading, setRestaurants } = useRestaurantStore();
   const { userId, isLoggedIn, points, setPoints, login } = useUserStore();
   const [unlockTarget, setUnlockTarget] = useState<LockedRestaurant | null>(null);
+  const { selectedId, setSelectedId } = useRestaurantStore();
   const [detailId, setDetailId] = useState<string | null>(null);
+
+  // 지도 마커 클릭 시 상세 모달 열기
+  useEffect(() => {
+    if (selectedId) {
+      setDetailId(selectedId);
+      setSelectedId(null);
+    }
+  }, [selectedId, setSelectedId]);
 
   const handleUnlockClick = (restaurantId: string) => {
     if (!isLoggedIn) {

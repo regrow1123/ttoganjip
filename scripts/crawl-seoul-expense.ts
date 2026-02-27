@@ -13,7 +13,7 @@ dotenv.config({ path: ".env.local" });
 
 import { db } from "../src/db/index";
 import { restaurants, restaurantStats } from "../src/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 
 const BASE_URL = "https://opengov.seoul.go.kr";
 const LIST_URL = `${BASE_URL}/expense/list?items_per_page=100`;
@@ -201,35 +201,57 @@ function estimateLocation(address: string): { lat: number; lng: number } | null 
 async function main() {
   console.log("🏛️ 서울시 업무추진비 크롤링 시작...\n");
   
-  // 1. 게시물 목록 수집 (최근 3페이지)
+  // 1. 게시물 목록 수집 (전체 페이지)
   const allPostUrls: string[] = [];
-  for (let page = 0; page < 3; page++) {
-    console.log(`📋 목록 페이지 ${page + 1} 수집 중...`);
+  const totalPages = 5; // 100개씩 5페이지 = 최대 500개
+  for (let page = 0; page < totalPages; page++) {
+    console.log(`📋 목록 페이지 ${page + 1}/${totalPages} 수집 중...`);
     try {
       const urls = await getPostUrls(page);
+      if (urls.length === 0) break; // 더 이상 없으면 중단
       allPostUrls.push(...urls);
     } catch (err) {
-      console.error(`  ⚠️ 페이지 ${page + 1} 실패, 건너뜀`);
+      console.error(`  ⚠️ 페이지 ${page + 1} 실패, 재시도...`);
+      await sleep(5000);
+      try {
+        const urls = await getPostUrls(page);
+        allPostUrls.push(...urls);
+      } catch { console.error(`  ❌ 페이지 ${page + 1} 재시도도 실패, 건너뜀`); }
     }
-    await sleep(2000); // 서버 부하 방지
+    await sleep(2000);
   }
   console.log(`  → ${allPostUrls.length}개 게시물 발견\n`);
   
-  // 2. 각 게시물 파싱
+  // 2. 각 게시물 파싱 (전체)
   const allRecords: ExpenseRecord[] = [];
   let parsed = 0;
+  const total = allPostUrls.length;
+  let consecutiveErrors = 0;
   
-  for (const url of allPostUrls.slice(0, 20)) { // 최근 20개만 (MVP)
+  for (const url of allPostUrls) {
     try {
-      console.log(`📄 파싱 중 [${++parsed}/${Math.min(allPostUrls.length, 20)}]: ${url}`);
+      parsed++;
+      if (parsed % 10 === 0 || parsed <= 3) {
+        console.log(`📄 파싱 중 [${parsed}/${total}]...`);
+      }
       const records = await parseExpensePage(url);
       const restaurantRecords = records.filter(isRestaurant);
       allRecords.push(...restaurantRecords);
-      console.log(`  → ${records.length}건 중 식당 ${restaurantRecords.length}건`);
-      await sleep(1500);
+      if (restaurantRecords.length > 0 && parsed <= 30) {
+        console.log(`  → ${records.length}건 중 식당 ${restaurantRecords.length}건`);
+      }
+      consecutiveErrors = 0;
+      await sleep(1000);
     } catch (err) {
-      console.error(`  ❌ 파싱 실패: ${url}`);
-      await sleep(3000);
+      consecutiveErrors++;
+      console.error(`  ❌ 파싱 실패 [${parsed}/${total}]: ${url}`);
+      if (consecutiveErrors >= 5) {
+        console.log("  ⚠️ 연속 5회 실패, 30초 대기...");
+        await sleep(30000);
+        consecutiveErrors = 0;
+      } else {
+        await sleep(3000);
+      }
     }
   }
   
@@ -291,7 +313,22 @@ async function main() {
       if (!data.location) continue;
       
       try {
-        // 음식점 저장 (이미 있으면 스킵)
+        // 같은 이름의 서울시 데이터가 이미 있는지 확인
+        const existing = await db
+          .select({ id: restaurants.id })
+          .from(restaurants)
+          .where(and(eq(restaurants.name, data.name), eq(restaurants.source, "seoul_expense")))
+          .limit(1);
+        
+        if (existing.length > 0) {
+          // 이미 있으면 통계만 업데이트
+          await db.update(restaurantStats).set({
+            totalVisits: data.visits.length,
+            maxRevisits: data.visits.length,
+          }).where(eq(restaurantStats.restaurantId, existing[0].id));
+          continue;
+        }
+        
         const [inserted] = await db
           .insert(restaurants)
           .values({
@@ -301,14 +338,14 @@ async function main() {
             lat: data.location.lat,
             lng: data.location.lng,
             region: data.region,
+            source: "seoul_expense",
           })
           .returning({ id: restaurants.id });
         
-        // 통계 저장
         await db.insert(restaurantStats).values({
           restaurantId: inserted.id,
           totalVisits: data.visits.length,
-          uniqueVisitors: 1, // 부서 단위로 집계 (추후 개선)
+          uniqueVisitors: 1,
           revisitCount: 1,
           maxRevisits: data.visits.length,
         });
