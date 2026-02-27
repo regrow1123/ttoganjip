@@ -64,7 +64,7 @@ export default function MyPage() {
     <div className="min-h-dvh bg-gray-50 dark:bg-gray-950">
       {/* 헤더 */}
       <header className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-4 py-3 flex items-center gap-3">
-        <button onClick={() => router.push("/")} className="text-gray-400 hover:text-gray-600">
+        <button onClick={() => router.push("/")} className="text-gray-400 hover:text-gray-600 dark:text-gray-300">
           ← 
         </button>
         <h1 className="text-base font-bold">마이페이지</h1>
@@ -77,23 +77,23 @@ export default function MyPage() {
             <span className="text-xl">👤</span>
           </div>
           <div>
-            <p className="text-base font-bold text-gray-900">{data.user.name}</p>
-            <p className="text-xs text-gray-400">{data.user.email}</p>
+            <p className="text-base font-bold text-gray-900 dark:text-gray-100">{data.user.name}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400">{data.user.email}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-3">
           <div className="text-center bg-orange-50 dark:bg-orange-900/30 rounded-xl p-3">
             <p className="text-lg font-bold text-orange-500">{data.user.points}</p>
-            <p className="text-[10px] text-gray-500">보유 포인트</p>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400">보유 포인트</p>
           </div>
-          <div className="text-center bg-gray-50 rounded-xl p-3">
-            <p className="text-lg font-bold text-gray-700">{data.stats.totalUnlocked}</p>
-            <p className="text-[10px] text-gray-500">열람한 맛집</p>
+          <div className="text-center bg-gray-50 dark:bg-gray-700 rounded-xl p-3">
+            <p className="text-lg font-bold text-gray-700 dark:text-gray-200">{data.stats.totalUnlocked}</p>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400">열람한 맛집</p>
           </div>
-          <div className="text-center bg-gray-50 rounded-xl p-3">
-            <p className="text-lg font-bold text-gray-700">{data.stats.totalSpent}P</p>
-            <p className="text-[10px] text-gray-500">사용한 포인트</p>
+          <div className="text-center bg-gray-50 dark:bg-gray-700 rounded-xl p-3">
+            <p className="text-lg font-bold text-gray-700 dark:text-gray-200">{data.stats.totalSpent}P</p>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400">사용한 포인트</p>
           </div>
         </div>
       </div>
@@ -145,7 +145,7 @@ export default function MyPage() {
             {data.unlockedRestaurants.length === 0 ? (
               <div className="text-center py-12">
                 <span className="text-3xl mb-2 block">🔒</span>
-                <p className="text-sm text-gray-400">아직 열람한 맛집이 없어요</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400">아직 열람한 맛집이 없어요</p>
               </div>
             ) : (
               data.unlockedRestaurants.map((r) => (
@@ -157,12 +157,12 @@ export default function MyPage() {
                     <p className="text-sm font-bold text-gray-900 truncate">{r.name}</p>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       {r.source && (
-                        <span className="text-[10px] text-gray-400">
+                        <span className="text-[10px] text-gray-400 dark:text-gray-500 dark:text-gray-400">
                           {SOURCE_LABEL[r.source] || r.source}
                         </span>
                       )}
                       <span className="text-[10px] text-gray-300">•</span>
-                      <span className="text-[10px] text-gray-400">
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500 dark:text-gray-400">
                         {r.category ? CATEGORY_LABELS[r.category] : "음식점"}
                       </span>
                       <span className="text-[10px] text-gray-300">•</span>
@@ -185,16 +185,16 @@ export default function MyPage() {
             {data.pointHistory.length === 0 ? (
               <div className="text-center py-12">
                 <span className="text-3xl mb-2 block">💰</span>
-                <p className="text-sm text-gray-400">포인트 내역이 없어요</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 dark:text-gray-400">포인트 내역이 없어요</p>
               </div>
             ) : (
               data.pointHistory.map((p, i) => (
                 <div key={i} className="bg-white dark:bg-gray-800 p-3 rounded-xl flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-700">
+                    <p className="text-sm text-gray-700 dark:text-gray-200">
                       {POINT_TYPE_LABELS[p.type] || p.type}
                     </p>
-                    <p className="text-[10px] text-gray-400">
+                    <p className="text-[10px] text-gray-400 dark:text-gray-500 dark:text-gray-400">
                       {new Date(p.createdAt).toLocaleDateString("ko-KR")}
                     </p>
                   </div>
