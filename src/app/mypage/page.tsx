@@ -156,12 +156,6 @@ export default function MyPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{r.name}</p>
                     <div className="flex items-center gap-1.5 mt-0.5">
-                      {r.source && (
-                        <span className="text-[10px] text-gray-400 dark:text-gray-400">
-                          {SOURCE_LABEL[r.source] || r.source}
-                        </span>
-                      )}
-                      <span className="text-[10px] text-gray-300 dark:text-gray-600">•</span>
                       <span className="text-[10px] text-gray-400 dark:text-gray-400">
                         {r.category ? CATEGORY_LABELS[r.category] : "음식점"}
                       </span>
