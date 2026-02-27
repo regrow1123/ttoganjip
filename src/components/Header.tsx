@@ -6,23 +6,26 @@ export default function Header() {
   const { points, isLoggedIn } = useUserStore();
 
   return (
-    <header className="flex items-center justify-between px-4 py-3 bg-white/90 backdrop-blur border-b border-gray-100">
-      <div className="flex items-center gap-2">
-        <span className="text-xl">🔥</span>
-        <h1 className="text-lg font-bold text-gray-900">또간집</h1>
+    <header className="flex-shrink-0 flex items-center justify-between px-4 py-2.5 bg-white/95 backdrop-blur-sm border-b border-gray-100 z-40">
+      <div className="flex items-center gap-1.5">
+        <span className="text-lg">🔥</span>
+        <h1 className="text-base font-bold text-gray-900">또간집</h1>
+        <span className="text-[10px] text-gray-400 ml-1 hidden sm:inline">
+          재방문이 증명하는 진짜 맛집
+        </span>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         {isLoggedIn ? (
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-orange-500">
+          <>
+            <span className="text-xs font-semibold text-orange-500 bg-orange-50 px-2 py-1 rounded-full">
               {points}P
             </span>
-            <button className="text-sm bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full hover:bg-gray-200 transition">
+            <button className="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full hover:bg-gray-200 transition">
               마이
             </button>
-          </div>
+          </>
         ) : (
-          <button className="text-sm bg-orange-500 text-white px-4 py-1.5 rounded-full hover:bg-orange-600 transition">
+          <button className="text-xs bg-orange-500 text-white px-3 py-1.5 rounded-full hover:bg-orange-600 transition font-medium">
             로그인
           </button>
         )}

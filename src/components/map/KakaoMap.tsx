@@ -107,7 +107,7 @@ export default function KakaoMap() {
     <div
       ref={mapRef}
       className="w-full h-full"
-      style={{ minHeight: "100dvh" }}
+      style={{ minHeight: "100%" }}
     />
   );
 }
