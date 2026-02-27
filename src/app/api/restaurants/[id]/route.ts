@@ -73,8 +73,16 @@ export async function GET(
     });
   }
 
+  // placeId 가져오기
+  const [full] = await db
+    .select({ placeId: restaurants.placeId })
+    .from(restaurants)
+    .where(eq(restaurants.id, id));
+
   return NextResponse.json({
     ...restaurant,
+    placeId: full?.placeId || null,
+    kakaoMapUrl: full?.placeId ? `https://place.map.kakao.com/${full.placeId}` : null,
     expenses,
     locked: false,
   });

@@ -16,6 +16,8 @@ interface DetailData {
   region?: string;
   source?: string;
   totalVisits: number;
+  placeId?: string | null;
+  kakaoMapUrl?: string | null;
   locked: boolean;
   expenses?: {
     date: string;
@@ -107,6 +109,18 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
                 <p className="text-sm text-gray-600">{data.address}</p>
                 <p className="text-base font-bold text-orange-500">🔥 {data.totalVisits}회 재방문</p>
               </div>
+
+              {/* 카카오맵 버튼 */}
+              {data.kakaoMapUrl && (
+                <a
+                  href={data.kakaoMapUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 py-2.5 bg-[#FEE500] text-[#191919] rounded-xl text-sm font-bold hover:bg-[#FDD800] transition"
+                >
+                  🗺️ 카카오맵에서 보기
+                </a>
+              )}
 
               {/* 국회의원 업무추진비 내역 */}
               {data.expenses && data.expenses.length > 0 && (
