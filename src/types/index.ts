@@ -22,14 +22,13 @@ export const CATEGORY_LABELS: Record<Category, string> = {
 };
 
 // 데이터 소스
-export const SOURCES = ["all", "assembly", "seoul_expense", "user"] as const;
+export const SOURCES = ["all", "assembly", "seoul_expense"] as const;
 export type Source = (typeof SOURCES)[number];
 
 export const SOURCE_LABELS: Record<Source, string> = {
   all: "전체",
   assembly: "🏛️ 국회의원",
   seoul_expense: "🏙️ 서울시 공무원",
-  user: "👤 유저 인증",
 };
 
 // 지도 뷰포트
