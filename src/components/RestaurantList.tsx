@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useRestaurantStore, useUserStore } from "@/lib/store";
 import { unlockRestaurant } from "@/lib/api";
 import { CATEGORY_LABELS } from "@/types";
 import type { LockedRestaurant, UnlockedRestaurant } from "@/types";
+import UnlockModal from "./UnlockModal";
 
 function LockedCard({ restaurant, onUnlock }: { restaurant: LockedRestaurant; onUnlock: (id: string) => void }) {
   return (
@@ -76,25 +78,27 @@ function UnlockedCard({ restaurant }: { restaurant: UnlockedRestaurant }) {
 
 export default function RestaurantList() {
   const { restaurants, isLoading, setRestaurants } = useRestaurantStore();
-  const { userId, isLoggedIn, setPoints, login } = useUserStore();
+  const { userId, isLoggedIn, points, setPoints, login } = useUserStore();
+  const [unlockTarget, setUnlockTarget] = useState<LockedRestaurant | null>(null);
 
-  const handleUnlock = async (restaurantId: string) => {
+  const handleUnlockClick = (restaurantId: string) => {
     if (!isLoggedIn) {
-      await login();
+      login();
       return;
     }
-    if (!userId) return;
+    const target = restaurants.find((r) => r.id === restaurantId && r.locked);
+    if (target && target.locked) setUnlockTarget(target);
+  };
 
-    const result = await unlockRestaurant(restaurantId, userId);
-    if (result.error) {
-      alert(result.error);
-      return;
-    }
+  const handleConfirmUnlock = async () => {
+    if (!unlockTarget || !userId) throw new Error("로그인이 필요합니다");
 
-    // 리스트에서 잠금 해제된 식당 업데이트
+    const result = await unlockRestaurant(unlockTarget.id, userId);
+    if (result.error) throw new Error(result.error);
+
     setRestaurants(
       restaurants.map((r) =>
-        r.id === restaurantId
+        r.id === unlockTarget.id
           ? {
               id: result.restaurant.id,
               name: result.restaurant.name,
@@ -145,10 +149,19 @@ export default function RestaurantList() {
       </div>
       {restaurants.map((r) =>
         r.locked ? (
-          <LockedCard key={r.id} restaurant={r} onUnlock={handleUnlock} />
+          <LockedCard key={r.id} restaurant={r} onUnlock={handleUnlockClick} />
         ) : (
           <UnlockedCard key={r.id} restaurant={r} />
         )
+      )}
+
+      {unlockTarget && (
+        <UnlockModal
+          restaurant={unlockTarget}
+          userPoints={points}
+          onConfirm={handleConfirmUnlock}
+          onClose={() => setUnlockTarget(null)}
+        />
       )}
     </div>
   );

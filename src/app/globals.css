@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+@keyframes slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes bounce-once {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+.animate-slide-up { animation: slide-up 0.25s ease-out; }
+.animate-bounce-once { animation: bounce-once 0.4s ease-out; }
+
 /* 스크롤바 숨기기 (카테고리 필터) */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
