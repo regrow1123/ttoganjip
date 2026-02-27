@@ -1,9 +1,14 @@
 "use client";
 
+import { useEffect } from "react";
 import { useUserStore } from "@/lib/store";
 
 export default function Header() {
-  const { points, isLoggedIn } = useUserStore();
+  const { points, isLoggedIn, name, login, logout, fetchMe } = useUserStore();
+
+  useEffect(() => {
+    fetchMe();
+  }, [fetchMe]);
 
   return (
     <header className="flex-shrink-0 flex items-center justify-between px-4 py-2.5 bg-white/95 backdrop-blur-sm border-b border-gray-100 z-40">
@@ -20,13 +25,20 @@ export default function Header() {
             <span className="text-xs font-semibold text-orange-500 bg-orange-50 px-2 py-1 rounded-full">
               {points}P
             </span>
-            <button className="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full hover:bg-gray-200 transition">
-              마이
+            <span className="text-xs text-gray-500 hidden sm:inline">{name}</span>
+            <button
+              onClick={logout}
+              className="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full hover:bg-gray-200 transition"
+            >
+              로그아웃
             </button>
           </>
         ) : (
-          <button className="text-xs bg-orange-500 text-white px-3 py-1.5 rounded-full hover:bg-orange-600 transition font-medium">
-            로그인
+          <button
+            onClick={login}
+            className="text-xs bg-orange-500 text-white px-3 py-1.5 rounded-full hover:bg-orange-600 transition font-medium"
+          >
+            체험 로그인
           </button>
         )}
       </div>

@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   const neLng = parseFloat(params.get("neLng") || "0");
   const category = params.get("category") || null;
   const source = params.get("source") || null; // 'all' | 'assembly' | 'seoul_expense' | 'user'
-  const userId = params.get("userId") || null;
+  const userId = params.get("userId") || req.cookies.get("demo_user_id")?.value || null;
 
   if (!swLat || !neLat) {
     return NextResponse.json({ error: "bounds required" }, { status: 400 });

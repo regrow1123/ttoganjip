@@ -11,8 +11,8 @@ export async function POST(
   const { id: restaurantId } = await params;
 
   // TODO: NextAuth 세션에서 userId 가져오기
-  const body = await req.json();
-  const userId = body.userId;
+  const body = await req.json().catch(() => ({}));
+  const userId = body.userId || req.cookies.get("demo_user_id")?.value;
 
   if (!userId) {
     return NextResponse.json({ error: "로그인이 필요합니다" }, { status: 401 });

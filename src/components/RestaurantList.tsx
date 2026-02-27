@@ -1,10 +1,11 @@
 "use client";
 
-import { useRestaurantStore } from "@/lib/store";
+import { useRestaurantStore, useUserStore } from "@/lib/store";
+import { unlockRestaurant } from "@/lib/api";
 import { CATEGORY_LABELS } from "@/types";
 import type { LockedRestaurant, UnlockedRestaurant } from "@/types";
 
-function LockedCard({ restaurant }: { restaurant: LockedRestaurant }) {
+function LockedCard({ restaurant, onUnlock }: { restaurant: LockedRestaurant; onUnlock: (id: string) => void }) {
   return (
     <div className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-xl hover:border-orange-200 transition">
       <div className="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -26,7 +27,10 @@ function LockedCard({ restaurant }: { restaurant: LockedRestaurant }) {
           </span>
         </div>
       </div>
-      <button className="flex-shrink-0 text-[11px] bg-orange-500 text-white px-2.5 py-1 rounded-full hover:bg-orange-600 transition font-medium">
+      <button
+        onClick={() => onUnlock(restaurant.id)}
+        className="flex-shrink-0 text-[11px] bg-orange-500 text-white px-2.5 py-1 rounded-full hover:bg-orange-600 transition font-medium"
+      >
         5P
       </button>
     </div>
@@ -71,7 +75,44 @@ function UnlockedCard({ restaurant }: { restaurant: UnlockedRestaurant }) {
 }
 
 export default function RestaurantList() {
-  const { restaurants, isLoading } = useRestaurantStore();
+  const { restaurants, isLoading, setRestaurants } = useRestaurantStore();
+  const { userId, isLoggedIn, setPoints, login } = useUserStore();
+
+  const handleUnlock = async (restaurantId: string) => {
+    if (!isLoggedIn) {
+      await login();
+      return;
+    }
+    if (!userId) return;
+
+    const result = await unlockRestaurant(restaurantId, userId);
+    if (result.error) {
+      alert(result.error);
+      return;
+    }
+
+    // 리스트에서 잠금 해제된 식당 업데이트
+    setRestaurants(
+      restaurants.map((r) =>
+        r.id === restaurantId
+          ? {
+              id: result.restaurant.id,
+              name: result.restaurant.name,
+              address: result.restaurant.address,
+              category: result.restaurant.category,
+              location: { lat: result.restaurant.lat, lng: result.restaurant.lng },
+              revisitScore: r.revisitScore,
+              source: (r as any).source,
+              locked: false as const,
+            }
+          : r
+      )
+    );
+
+    if (result.remainingPoints !== undefined) {
+      setPoints(result.remainingPoints);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -104,7 +145,7 @@ export default function RestaurantList() {
       </div>
       {restaurants.map((r) =>
         r.locked ? (
-          <LockedCard key={r.id} restaurant={r} />
+          <LockedCard key={r.id} restaurant={r} onUnlock={handleUnlock} />
         ) : (
           <UnlockedCard key={r.id} restaurant={r} />
         )

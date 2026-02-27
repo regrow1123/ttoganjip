@@ -46,15 +46,43 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
 }));
 
 interface UserState {
+  userId: string | null;
+  name: string | null;
   points: number;
   isLoggedIn: boolean;
+  setUser: (user: { id: string; name: string; points: number } | null) => void;
   setPoints: (points: number) => void;
-  setLoggedIn: (loggedIn: boolean) => void;
+  login: () => Promise<void>;
+  logout: () => Promise<void>;
+  fetchMe: () => Promise<void>;
 }
 
 export const useUserStore = create<UserState>((set) => ({
+  userId: null,
+  name: null,
   points: 0,
   isLoggedIn: false,
+  setUser: (user) =>
+    set(
+      user
+        ? { userId: user.id, name: user.name, points: user.points, isLoggedIn: true }
+        : { userId: null, name: null, points: 0, isLoggedIn: false }
+    ),
   setPoints: (points) => set({ points }),
-  setLoggedIn: (loggedIn) => set({ isLoggedIn: loggedIn }),
+  login: async () => {
+    const res = await fetch("/api/auth/demo-login", { method: "POST" });
+    const data = await res.json();
+    set({ userId: data.id, name: data.name, points: data.points, isLoggedIn: true });
+  },
+  logout: async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    set({ userId: null, name: null, points: 0, isLoggedIn: false });
+  },
+  fetchMe: async () => {
+    const res = await fetch("/api/auth/me");
+    const { user } = await res.json();
+    if (user) {
+      set({ userId: user.id, name: user.name, points: user.points, isLoggedIn: true });
+    }
+  },
 }));
