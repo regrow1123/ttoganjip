@@ -19,16 +19,22 @@ export const useMapStore = create<MapState>((set) => ({
   setLevel: (level) => set({ level }),
 }));
 
+type SortBy = "revisit" | "name";
+
 interface RestaurantState {
   restaurants: Restaurant[];
   selectedId: string | null;
   categoryFilter: Category | null;
   sourceFilter: Source;
+  searchQuery: string;
+  sortBy: SortBy;
   isLoading: boolean;
   setRestaurants: (restaurants: Restaurant[]) => void;
   setSelectedId: (id: string | null) => void;
   setCategoryFilter: (category: Category | null) => void;
   setSourceFilter: (source: Source) => void;
+  setSearchQuery: (query: string) => void;
+  setSortBy: (sort: SortBy) => void;
   setLoading: (loading: boolean) => void;
 }
 
@@ -37,11 +43,15 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
   selectedId: null,
   categoryFilter: null,
   sourceFilter: "all",
+  searchQuery: "",
+  sortBy: "revisit",
   isLoading: false,
   setRestaurants: (restaurants) => set({ restaurants }),
   setSelectedId: (id) => set({ selectedId: id }),
   setCategoryFilter: (category) => set({ categoryFilter: category }),
   setSourceFilter: (source) => set({ sourceFilter: source }),
+  setSearchQuery: (query) => set({ searchQuery: query }),
+  setSortBy: (sort) => set({ sortBy: sort }),
   setLoading: (loading) => set({ isLoading: loading }),
 }));
 

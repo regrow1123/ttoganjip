@@ -70,7 +70,7 @@ function UnlockedCard({ restaurant, onClick, index }: { restaurant: UnlockedRest
 }
 
 export default function RestaurantList() {
-  const { restaurants, isLoading, setRestaurants } = useRestaurantStore();
+  const { restaurants, isLoading, setRestaurants, searchQuery, sortBy } = useRestaurantStore();
   const { userId, isLoggedIn, points, setPoints, login } = useUserStore();
   const [unlockTarget, setUnlockTarget] = useState<LockedRestaurant | null>(null);
   const { selectedId, setSelectedId } = useRestaurantStore();
@@ -103,6 +103,30 @@ export default function RestaurantList() {
     if (result.remainingPoints !== undefined) setPoints(result.remainingPoints);
   };
 
+  // 검색 필터링
+  const filtered = restaurants.filter((r) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    if (!r.locked && "name" in r) {
+      return r.name.toLowerCase().includes(q) || r.address?.toLowerCase().includes(q);
+    }
+    // locked: areaHint로 검색
+    if (r.locked && "areaHint" in r) {
+      return r.areaHint?.toLowerCase().includes(q);
+    }
+    return false;
+  });
+
+  // 정렬
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === "name") {
+      const nameA = a.locked ? "zzz" : ("name" in a ? a.name : "");
+      const nameB = b.locked ? "zzz" : ("name" in b ? b.name : "");
+      return nameA.localeCompare(nameB, "ko");
+    }
+    return b.revisitScore - a.revisitScore;
+  });
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -112,12 +136,14 @@ export default function RestaurantList() {
     );
   }
 
-  if (restaurants.length === 0) {
+  if (sorted.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4">
-        <span className="text-3xl mb-2">🗺️</span>
+        <span className="text-3xl mb-2">{searchQuery ? "🔍" : "🗺️"}</span>
         <p className="text-sm text-gray-400 dark:text-tn-fg-dark text-center">
-          이 지역에 등록된 재방문 맛집이 없어요.<br />지도를 이동해보세요!
+          {searchQuery
+            ? `"${searchQuery}" 검색 결과가 없어요.`
+            : "이 지역에 등록된 재방문 맛집이 없어요.\n지도를 이동해보세요!"}
         </p>
       </div>
     );
@@ -126,11 +152,13 @@ export default function RestaurantList() {
   return (
     <div className="flex flex-col gap-2 px-4 pb-4">
       <div className="flex items-center justify-between py-1">
-        <h2 className="text-xs font-semibold text-gray-400 dark:text-tn-fg-dark">재방문 맛집 {restaurants.length}곳</h2>
+        <h2 className="text-xs font-semibold text-gray-400 dark:text-tn-fg-dark">
+          재방문 맛집 {sorted.length}곳{searchQuery && ` (검색: ${searchQuery})`}
+        </h2>
       </div>
       {(() => {
         let unlockedIdx = 0;
-        return restaurants.map((r) =>
+        return sorted.map((r) =>
           r.locked ? (
             <LockedCard key={r.id} restaurant={r} onUnlock={handleUnlockClick} />
           ) : (
