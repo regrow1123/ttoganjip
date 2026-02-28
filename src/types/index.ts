@@ -38,12 +38,15 @@ export interface MapBounds {
 }
 
 // 잠금 상태 맛집 (리스트용)
+export type Grade = "none" | "ttoganjip" | "dangol" | "jjin";
+
 export interface LockedRestaurant {
   id: string;
   category: Category | null;
   revisitScore: number;
   areaHint: string;
   source?: string;
+  grade?: Grade;
   locked: true;
 }
 
@@ -56,6 +59,7 @@ export interface UnlockedRestaurant {
   location: { lat: number; lng: number };
   revisitScore: number;
   source?: string;
+  grade?: Grade;
   locked: false;
 }
 

@@ -54,7 +54,11 @@ export default function KakaoMap() {
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
           ">
             <div style="
-              background: #89b4fa;
+              background: ${
+                r.grade === 'jjin' ? '#cba6f7' :
+                r.grade === 'dangol' ? '#89b4fa' :
+                '#94e2d5'
+              };
               color: white;
               width: 30px;
               height: 30px;

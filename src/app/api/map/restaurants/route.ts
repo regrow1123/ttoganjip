@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/index";
 import { restaurants, restaurantStats, unlocks, visits } from "@/db/schema";
+import { getGrade } from "@/lib/grade";
 import { and, gte, lte, eq, sql, inArray } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
@@ -77,6 +78,8 @@ export async function GET(req: NextRequest) {
   const result = rows.map((r) => {
     const isUnlocked = unlockedIds.has(r.id);
 
+    const grade = getGrade(r.totalVisits);
+
     if (isUnlocked) {
       return {
         id: r.id,
@@ -86,6 +89,7 @@ export async function GET(req: NextRequest) {
         location: { lat: r.lat, lng: r.lng },
         revisitScore: r.totalVisits,
         source: r.source,
+        grade,
         locked: false,
       };
     }
@@ -96,6 +100,7 @@ export async function GET(req: NextRequest) {
       revisitScore: r.totalVisits,
       areaHint: r.region || "서울",
       source: r.source,
+      grade,
       locked: true,
     };
   });
