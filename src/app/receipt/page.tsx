@@ -13,6 +13,7 @@ interface VerifyResult {
   pointsEarned?: number;
   totalPoints?: number;
   error?: string;
+  lines?: string[];
 }
 
 export default function ReceiptPage() {
@@ -228,6 +229,14 @@ export default function ReceiptPage() {
             </div>
             <h3 className="text-base font-bold text-ctp-text dark:text-tn-fg-bright">인증 실패</h3>
             <p className="text-sm text-ctp-subtext dark:text-tn-fg-dark text-center">{result.error}</p>
+            {result.lines && result.lines.length > 0 && (
+              <details className="w-full mt-1">
+                <summary className="text-xs text-ctp-overlay dark:text-tn-fg-dark cursor-pointer">OCR 인식 결과 보기</summary>
+                <div className="mt-2 bg-ctp-mantle dark:bg-tn-bg-highlight rounded-lg p-3 text-xs text-ctp-subtext dark:text-tn-fg-dark max-h-32 overflow-y-auto">
+                  {result.lines.map((l, i) => <div key={i}>{l}</div>)}
+                </div>
+              </details>
+            )}
             <button onClick={reset} className="w-full py-2.5 text-sm font-medium text-ctp-subtext dark:text-tn-fg bg-ctp-mantle dark:bg-tn-bg-highlight rounded-xl mt-2">
               다시 시도
             </button>
