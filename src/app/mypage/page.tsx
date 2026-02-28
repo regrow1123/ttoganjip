@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CATEGORY_LABELS, type Category } from "@/types";
 import { useThemeStore } from "@/lib/theme";
+import { useUserStore } from "@/lib/store";
 
 const POINT_TYPE_LABELS: Record<string, string> = {
   unlock: "🔓 맛집 열람",
@@ -39,6 +40,7 @@ export default function MyPage() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"unlocked" | "points">("unlocked");
   const { mode, setMode } = useThemeStore();
+  const { logout } = useUserStore();
 
   useEffect(() => {
     fetch("/api/users/me")
@@ -207,6 +209,16 @@ export default function MyPage() {
             )}
           </div>
         )}
+      </div>
+
+      {/* 로그아웃 */}
+      <div className="px-4 pb-8">
+        <button
+          onClick={() => { logout(); router.push("/"); }}
+          className="w-full py-3 text-sm text-red-500 dark:text-tn-red bg-white dark:bg-tn-bg-card rounded-xl border border-gray-100 dark:border-tn-border hover:bg-red-50 dark:hover:bg-tn-red/10 transition"
+        >
+          로그아웃
+        </button>
       </div>
     </div>
   );
