@@ -26,16 +26,20 @@ function LockedCard({ restaurant, onUnlock }: { restaurant: LockedRestaurant; on
           </span>
           <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
           <span className="text-[10px] text-ctp-overlay dark:text-tn-fg-dark">{restaurant.areaHint}</span>
-          <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
-          {(restaurant.userVisits ?? 0) > 0 && (
-            <span className={`text-[10px] font-semibold ${restaurant.grade && restaurant.grade !== 'none' ? GRADE_COLOR[restaurant.grade] : "text-tn-blue"}`}>
-              {restaurant.grade && GRADE_MEDAL[restaurant.grade] ? GRADE_MEDAL[restaurant.grade] + " " : ""}{restaurant.grade && GRADE_LABEL[restaurant.grade] ? GRADE_LABEL[restaurant.grade] + " " : ""}인증 {restaurant.userVisits}회
-            </span>
-          )}
-          {(restaurant.publicVisits ?? 0) > 0 && (
+          {restaurant.source && (
             <>
-              {(restaurant.userVisits ?? 0) > 0 && <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>}
-              <span className="text-[10px] text-ctp-overlay dark:text-tn-fg-dark">공공 {restaurant.publicVisits}회</span>
+              <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
+              <span className="text-[10px] text-ctp-subtext dark:text-tn-fg-dark">
+                {SOURCE_BADGE[restaurant.source] || restaurant.source}{(restaurant.publicVisits ?? 0) > 0 ? ` (${restaurant.publicVisits}회)` : ""}
+              </span>
+            </>
+          )}
+          {(restaurant.userVisits ?? 0) > 0 && (
+            <>
+              <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
+              <span className={`text-[10px] font-semibold ${restaurant.grade && restaurant.grade !== 'none' ? GRADE_COLOR[restaurant.grade] : "text-tn-blue"}`}>
+                {restaurant.grade && GRADE_MEDAL[restaurant.grade] ? GRADE_MEDAL[restaurant.grade] + " " : ""}{restaurant.grade && GRADE_LABEL[restaurant.grade] ? GRADE_LABEL[restaurant.grade] + " " : ""}인증 {restaurant.userVisits}회
+              </span>
             </>
           )}
         </div>
@@ -62,23 +66,19 @@ function UnlockedCard({ restaurant, onClick, index }: { restaurant: UnlockedRest
         <div className="flex items-center gap-1.5 mt-0.5">
           {restaurant.source && (
             <span className="text-[10px] text-ctp-subtext dark:text-tn-fg-dark">
-              {SOURCE_BADGE[restaurant.source] || restaurant.source}
+              {SOURCE_BADGE[restaurant.source] || restaurant.source}{(restaurant.publicVisits ?? 0) > 0 ? ` (${restaurant.publicVisits}회)` : ""}
             </span>
           )}
           <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
           <span className="text-[10px] text-ctp-subtext dark:text-tn-fg-dark">
             {restaurant.category ? CATEGORY_LABELS[restaurant.category] : "음식점"}
           </span>
-          <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
           {(restaurant.userVisits ?? 0) > 0 && (
-            <span className={`text-[10px] font-semibold ${restaurant.grade && restaurant.grade !== 'none' ? GRADE_COLOR[restaurant.grade] : "text-tn-blue"}`}>
-              {restaurant.grade && GRADE_MEDAL[restaurant.grade] ? GRADE_MEDAL[restaurant.grade] + " " : ""}{restaurant.grade && GRADE_LABEL[restaurant.grade] ? GRADE_LABEL[restaurant.grade] + " " : ""}인증 {restaurant.userVisits}회
-            </span>
-          )}
-          {(restaurant.publicVisits ?? 0) > 0 && (
             <>
-              {(restaurant.userVisits ?? 0) > 0 && <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>}
-              <span className="text-[10px] text-ctp-overlay dark:text-tn-fg-dark">공공 {restaurant.publicVisits}회</span>
+              <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
+              <span className={`text-[10px] font-semibold ${restaurant.grade && restaurant.grade !== 'none' ? GRADE_COLOR[restaurant.grade] : "text-tn-blue"}`}>
+                {restaurant.grade && GRADE_MEDAL[restaurant.grade] ? GRADE_MEDAL[restaurant.grade] + " " : ""}{restaurant.grade && GRADE_LABEL[restaurant.grade] ? GRADE_LABEL[restaurant.grade] + " " : ""}인증 {restaurant.userVisits}회
+              </span>
             </>
           )}
         </div>
