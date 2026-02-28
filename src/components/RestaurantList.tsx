@@ -245,7 +245,7 @@ export default function RestaurantList() {
 
         {detailId && <RestaurantDetail restaurantId={detailId} onClose={() => setDetailId(null)} />}
         {unlockTarget && (
-          <UnlockModal restaurant={unlockTarget} userPoints={points} onConfirm={handleConfirmUnlock} onClose={() => setUnlockTarget(null)} />
+          <UnlockModal restaurant={unlockTarget} userPoints={points} onConfirm={handleConfirmUnlock} onClose={() => setUnlockTarget(null)} onSuccess={() => unlockTarget && setDetailId(unlockTarget.id)} />
         )}
       </div>
     );
@@ -292,7 +292,7 @@ export default function RestaurantList() {
       })()}
       {detailId && <RestaurantDetail restaurantId={detailId} onClose={() => setDetailId(null)} />}
       {unlockTarget && (
-        <UnlockModal restaurant={unlockTarget} userPoints={points} onConfirm={handleConfirmUnlock} onClose={() => setUnlockTarget(null)} />
+        <UnlockModal restaurant={unlockTarget} userPoints={points} onConfirm={handleConfirmUnlock} onClose={() => setUnlockTarget(null)} onSuccess={() => unlockTarget && setDetailId(unlockTarget.id)} />
       )}
     </div>
   );

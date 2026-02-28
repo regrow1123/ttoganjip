@@ -13,6 +13,7 @@ interface UnlockModalProps {
   userPoints: number;
   onConfirm: () => Promise<void>;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
 export default function UnlockModal({
@@ -20,6 +21,7 @@ export default function UnlockModal({
   userPoints,
   onConfirm,
   onClose,
+  onSuccess,
 }: UnlockModalProps) {
   const [status, setStatus] = useState<"confirm" | "loading" | "success" | "error">("confirm");
   const [result, setResult] = useState<{ name: string; address: string } | null>(null);
@@ -94,7 +96,7 @@ export default function UnlockModal({
             <h3 className="text-base font-bold text-gray-900 dark:text-tn-fg-bright">잠금 해제 완료!</h3>
             <p className="text-xs text-gray-400 dark:text-tn-fg-dark">-5P 차감되었습니다</p>
             <button
-              onClick={onClose}
+              onClick={() => { onClose(); onSuccess?.(); }}
               className="mt-2 w-full py-2.5 text-sm font-bold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition"
             >
               확인
