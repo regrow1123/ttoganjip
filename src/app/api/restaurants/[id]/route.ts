@@ -82,7 +82,9 @@ export async function GET(
   return NextResponse.json({
     ...restaurant,
     placeId: full?.placeId || null,
-    kakaoMapUrl: full?.placeId ? `https://place.map.kakao.com/${full.placeId}` : null,
+    kakaoMapUrl: full?.placeId
+      ? `https://place.map.kakao.com/${full.placeId}`
+      : `https://map.kakao.com/?q=${encodeURIComponent(restaurant.name)}`,
     expenses,
     locked: false,
   });
