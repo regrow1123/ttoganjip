@@ -18,6 +18,7 @@ interface VerifyResult {
 export default function ReceiptPage() {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [ocrProgress, setOcrProgress] = useState(0);
@@ -107,23 +108,44 @@ export default function ReceiptPage() {
           </p>
         </div>
 
-        {/* 업로드 영역 */}
-        <div
-          onClick={() => status === "idle" && fileRef.current?.click()}
-          className={`bg-ctp-base dark:bg-tn-bg-card border-2 border-dashed border-ctp-surface0 dark:border-tn-border rounded-xl p-8 flex flex-col items-center gap-3 transition ${
-            status === "idle" ? "cursor-pointer hover:border-tn-blue" : ""
-          }`}
-        >
-          {preview ? (
+        {/* 미리보기 */}
+        {preview && (
+          <div className="bg-ctp-base dark:bg-tn-bg-card border-2 border-ctp-surface0 dark:border-tn-border rounded-xl p-4 flex flex-col items-center">
             <img src={preview} alt="영수증" className="max-h-64 rounded-lg object-contain" />
-          ) : (
-            <>
-              <span className="text-4xl">📸</span>
-              <p className="text-sm text-ctp-overlay dark:text-tn-fg-dark">영수증 촬영 또는 갤러리에서 선택</p>
-            </>
-          )}
-        </div>
+          </div>
+        )}
 
+        {/* 업로드 버튼 */}
+        {!preview && status === "idle" && (
+          <div className="flex gap-3">
+            <button
+              onClick={() => cameraRef.current?.click()}
+              className="flex-1 py-4 bg-ctp-base dark:bg-tn-bg-card border-2 border-dashed border-ctp-surface0 dark:border-tn-border rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-tn-blue transition"
+            >
+              <span className="text-2xl">📷</span>
+              <span className="text-xs text-ctp-subtext dark:text-tn-fg-dark">카메라 촬영</span>
+            </button>
+            <button
+              onClick={() => fileRef.current?.click()}
+              className="flex-1 py-4 bg-ctp-base dark:bg-tn-bg-card border-2 border-dashed border-ctp-surface0 dark:border-tn-border rounded-xl flex flex-col items-center gap-2 cursor-pointer hover:border-tn-blue transition"
+            >
+              <span className="text-2xl">🖼️</span>
+              <span className="text-xs text-ctp-subtext dark:text-tn-fg-dark">갤러리 선택</span>
+            </button>
+          </div>
+        )}
+
+        <input
+          ref={cameraRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleFile(file);
+          }}
+        />
         <input
           ref={fileRef}
           type="file"
