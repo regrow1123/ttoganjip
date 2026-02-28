@@ -162,7 +162,7 @@ export default function RestaurantList() {
         {searchDbResults.length > 0 && (
           <>
             <h2 className="text-xs font-semibold text-orange-500 py-1">🔥 또간집 등록 맛집 ({searchDbResults.length})</h2>
-            {searchDbResults.map((r) => (
+            {searchDbResults.map((r, idx) => (
               <a
                 key={r.id}
                 href={r.placeUrl || "#"}
@@ -170,6 +170,9 @@ export default function RestaurantList() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-tn-orange/10 border border-orange-100 dark:border-tn-orange/20 rounded-xl hover:border-orange-200 transition"
               >
+                <div className="flex-shrink-0 w-7 h-7 bg-[#FF6B35] rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">{idx + 1}</span>
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-gray-900 dark:text-tn-fg-bright truncate">
                     {SOURCE_LABEL[r.source] || ""} {r.name}
