@@ -40,6 +40,14 @@ export default function ReceiptPage() {
 
     let ocrText = "";
     try {
+      // File → base64 Data URL로 변환
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("파일 읽기 실패"));
+        reader.readAsDataURL(file);
+      });
+
       const worker = await createWorker("kor+eng", 1, {
         logger: (m) => {
           if (m.status === "recognizing text") {
@@ -47,7 +55,7 @@ export default function ReceiptPage() {
           }
         },
       });
-      const result = await worker.recognize(file);
+      const result = await worker.recognize(dataUrl);
       ocrText = result.data.text;
       await worker.terminate();
     } catch (err: any) {
