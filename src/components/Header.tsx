@@ -27,7 +27,12 @@ export default function Header() {
             <span className="text-xs font-semibold text-orange-500 bg-orange-50 dark:bg-tn-orange/10 px-2 py-1 rounded-full">
               {points}P
             </span>
-            <span className="text-xs text-gray-500 dark:text-tn-fg-dark hidden sm:inline">{name}</span>
+            <button
+              onClick={() => router.push("/receipt")}
+              className="text-xs bg-orange-500 text-white px-3 py-1.5 rounded-full hover:bg-orange-600 transition font-medium"
+            >
+              📸
+            </button>
             <button
               onClick={() => router.push("/mypage")}
               className="text-xs bg-gray-100 dark:bg-tn-bg-card text-gray-700 dark:text-tn-fg px-3 py-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-tn-bg-highlight transition"
