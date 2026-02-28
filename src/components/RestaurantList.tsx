@@ -42,11 +42,11 @@ const SOURCE_BADGE: Record<string, string> = {
   user: "👤 유저",
 };
 
-function UnlockedCard({ restaurant, onClick }: { restaurant: UnlockedRestaurant; onClick: () => void }) {
+function UnlockedCard({ restaurant, onClick, index }: { restaurant: UnlockedRestaurant; onClick: () => void; index: number }) {
   return (
     <div onClick={onClick} className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-tn-orange/20 rounded-xl cursor-pointer hover:border-orange-200 dark:hover:border-orange-700 transition">
-      <div className="flex-shrink-0 w-10 h-10 bg-orange-100 dark:bg-tn-orange/10 rounded-lg flex items-center justify-center">
-        <span className="text-lg">🍽️</span>
+      <div className="flex-shrink-0 w-7 h-7 bg-[#FF6B35] rounded-full flex items-center justify-center">
+        <span className="text-xs font-bold text-white">{index}</span>
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-bold text-gray-900 dark:text-tn-fg-bright truncate">{restaurant.name}</p>
@@ -128,13 +128,16 @@ export default function RestaurantList() {
       <div className="flex items-center justify-between py-1">
         <h2 className="text-xs font-semibold text-gray-400 dark:text-tn-fg-dark">재방문 맛집 {restaurants.length}곳</h2>
       </div>
-      {restaurants.map((r) =>
-        r.locked ? (
-          <LockedCard key={r.id} restaurant={r} onUnlock={handleUnlockClick} />
-        ) : (
-          <UnlockedCard key={r.id} restaurant={r} onClick={() => setDetailId(r.id)} />
-        )
-      )}
+      {(() => {
+        let unlockedIdx = 0;
+        return restaurants.map((r) =>
+          r.locked ? (
+            <LockedCard key={r.id} restaurant={r} onUnlock={handleUnlockClick} />
+          ) : (
+            <UnlockedCard key={r.id} restaurant={r} index={++unlockedIdx} onClick={() => setDetailId(r.id)} />
+          )
+        );
+      })()}
       {detailId && <RestaurantDetail restaurantId={detailId} onClose={() => setDetailId(null)} />}
       {unlockTarget && (
         <UnlockModal restaurant={unlockTarget} userPoints={points} onConfirm={handleConfirmUnlock} onClose={() => setUnlockTarget(null)} />

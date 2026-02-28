@@ -36,28 +36,31 @@ export default function KakaoMap() {
 
       const unlocked = items.filter((r) => !r.locked && "location" in r);
 
-      unlocked.forEach((r) => {
+      unlocked.forEach((r, idx) => {
         if (r.locked || !("location" in r)) return;
 
         const position = new window.kakao.maps.LatLng(r.location.lat, r.location.lng);
+        const num = idx + 1;
 
-        // 커스텀 오버레이 (마커 대신)
+        // 번호 핀 오버레이
         const content = document.createElement("div");
         content.innerHTML = `
           <div style="
             background: #FF6B35;
             color: white;
-            padding: 4px 8px;
-            border-radius: 16px;
-            font-size: 11px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-size: 12px;
             font-weight: 700;
-            white-space: nowrap;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
             cursor: pointer;
-            transform: translateY(-50%);
             border: 2px solid white;
           ">
-            🔥 ${r.name}
+            ${num}
           </div>
         `;
 
