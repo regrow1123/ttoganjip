@@ -172,19 +172,17 @@ export default function MyPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-ctp-text dark:text-tn-blue truncate">{r.name}</p>
                     <div className="flex items-center gap-1.5 mt-0.5">
-                      {r.source && (
-                        <span className="text-[10px] text-ctp-overlay dark:text-tn-fg-dark">
-                          {SOURCE_LABEL[r.source] || r.source}
-                        </span>
-                      )}
-                      <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
                       <span className="text-[10px] text-ctp-overlay dark:text-tn-fg-dark">
                         {r.category ? CATEGORY_LABELS[r.category] : "음식점"}
                       </span>
-                      <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
-                      <span className="text-[10px] text-tn-blue font-medium">
-                        🔥 {r.totalVisits}회
-                      </span>
+                      {r.source && r.source !== "user" && (
+                        <>
+                          <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
+                          <span className="text-[10px] text-ctp-subtext dark:text-tn-fg-dark">
+                            {SOURCE_LABEL[r.source] || r.source}{r.totalVisits > 0 ? ` (${r.totalVisits}회)` : ""}
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
                   <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">
