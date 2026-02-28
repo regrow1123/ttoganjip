@@ -54,9 +54,6 @@ export default function KakaoMap() {
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
           ">
             <div style="position: relative;">
-              ${r.grade === 'jjin' ? '<span style="position:absolute;top:-8px;right:-8px;font-size:12px;z-index:1;">🥇</span>' :
-                r.grade === 'dangol' ? '<span style="position:absolute;top:-8px;right:-8px;font-size:12px;z-index:1;">🥈</span>' :
-                r.grade === 'ttoganjip' ? '<span style="position:absolute;top:-8px;right:-8px;font-size:12px;z-index:1;">🥉</span>' : ''}
               <div style="
                 background: #89b4fa;
                 color: white;

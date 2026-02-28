@@ -21,6 +21,13 @@ export const GRADE_COLOR: Record<Grade, string> = {
   jjin: "text-tn-magenta",
 };
 
+export const GRADE_MEDAL: Record<Grade, string> = {
+  none: "",
+  ttoganjip: "🥉",
+  dangol: "🥈",
+  jjin: "🥇",
+};
+
 export const GRADE_BG: Record<Grade, string> = {
   none: "",
   ttoganjip: "bg-tn-cyan/10",

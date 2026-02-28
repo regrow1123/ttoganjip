@@ -5,7 +5,7 @@ import { useRestaurantStore, useUserStore, type SearchDbResult, type SearchKakao
 import { unlockRestaurant } from "@/lib/api";
 import { CATEGORY_LABELS } from "@/types";
 import type { LockedRestaurant, UnlockedRestaurant, Grade } from "@/types";
-import { GRADE_LABEL, GRADE_COLOR } from "@/lib/grade";
+import { GRADE_LABEL, GRADE_COLOR, GRADE_MEDAL } from "@/lib/grade";
 import UnlockModal from "./UnlockModal";
 import RestaurantDetail from "./RestaurantDetail";
 
@@ -28,7 +28,7 @@ function LockedCard({ restaurant, onUnlock }: { restaurant: LockedRestaurant; on
           <span className="text-[10px] text-ctp-overlay dark:text-tn-fg-dark">{restaurant.areaHint}</span>
           <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
           <span className={`text-[10px] font-semibold ${restaurant.grade ? GRADE_COLOR[restaurant.grade] : "text-tn-blue"}`}>
-            {restaurant.grade && GRADE_LABEL[restaurant.grade] ? GRADE_LABEL[restaurant.grade] : ""} {restaurant.revisitScore}회
+            {restaurant.grade && GRADE_MEDAL[restaurant.grade] ? GRADE_MEDAL[restaurant.grade] + " " : ""}{restaurant.grade && GRADE_LABEL[restaurant.grade] ? GRADE_LABEL[restaurant.grade] : ""} {restaurant.revisitScore}회
           </span>
         </div>
       </div>
@@ -63,7 +63,7 @@ function UnlockedCard({ restaurant, onClick, index }: { restaurant: UnlockedRest
           </span>
           <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
           <span className={`text-[10px] font-semibold ${restaurant.grade ? GRADE_COLOR[restaurant.grade] : "text-tn-blue"}`}>
-            {restaurant.grade && GRADE_LABEL[restaurant.grade] ? GRADE_LABEL[restaurant.grade] : ""} {restaurant.revisitScore}회
+            {restaurant.grade && GRADE_MEDAL[restaurant.grade] ? GRADE_MEDAL[restaurant.grade] + " " : ""}{restaurant.grade && GRADE_LABEL[restaurant.grade] ? GRADE_LABEL[restaurant.grade] : ""} {restaurant.revisitScore}회
           </span>
         </div>
         <p className="text-[10px] text-ctp-overlay dark:text-tn-fg-dark truncate mt-0.5">{restaurant.address}</p>
