@@ -85,7 +85,10 @@ export async function POST(req: NextRequest) {
 
   await db
     .update(restaurantStats)
-    .set({ totalVisits: sql`${restaurantStats.totalVisits} + 1` })
+    .set({
+      totalVisits: sql`${restaurantStats.totalVisits} + 1`,
+      userVisits: sql`${restaurantStats.userVisits} + 1`,
+    })
     .where(eq(restaurantStats.restaurantId, restaurantId));
 
   const [user] = await db

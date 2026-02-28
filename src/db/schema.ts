@@ -60,6 +60,8 @@ export const visits = pgTable("visits", {
 export const restaurantStats = pgTable("restaurant_stats", {
   restaurantId: uuid("restaurant_id").primaryKey().references(() => restaurants.id),
   totalVisits: integer("total_visits").default(0).notNull(),
+  publicVisits: integer("public_visits").default(0).notNull(),
+  userVisits: integer("user_visits").default(0).notNull(),
   uniqueVisitors: integer("unique_visitors").default(0).notNull(),
   revisitCount: integer("revisit_count").default(0).notNull(), // 재방문자 수
   maxRevisits: integer("max_revisits").default(0).notNull(), // 최다 재방문

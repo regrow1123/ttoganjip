@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
       source: restaurants.source,
       totalVisits: restaurantStats.totalVisits,
       maxRevisits: restaurantStats.maxRevisits,
+      userVisits: restaurantStats.userVisits,
     })
     .from(restaurants)
     .innerJoin(restaurantStats, eq(restaurants.id, restaurantStats.restaurantId))
@@ -78,7 +79,7 @@ export async function GET(req: NextRequest) {
   const result = rows.map((r) => {
     const isUnlocked = unlockedIds.has(r.id);
 
-    const grade = r.source === "user" ? getGrade(r.totalVisits) : "none" as const;
+    const grade = getGrade(r.userVisits ?? 0);
 
     if (isUnlocked) {
       return {
