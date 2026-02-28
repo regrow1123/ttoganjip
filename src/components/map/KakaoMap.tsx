@@ -17,7 +17,7 @@ export default function KakaoMap() {
   const markersRef = useRef<any[]>([]);
   const overlaysRef = useRef<any[]>([]);
   const { setBounds, setCenter, setLevel } = useMapStore();
-  const { restaurants, setRestaurants, setLoading, setSelectedId, categoryFilter, sourceFilter } =
+  const { restaurants, setRestaurants, setLoading, setSelectedId, categoryFilter, sourceFilter, searchQuery } =
     useRestaurantStore();
 
   // 마커 전부 제거
@@ -160,10 +160,24 @@ export default function KakaoMap() {
     return () => { script.remove(); };
   }, [setBounds, setCenter, setLevel, loadRestaurants]);
 
-  // restaurants 변경 시 마커 업데이트
+  // restaurants 또는 검색어 변경 시 마커 업데이트
   useEffect(() => {
-    renderMarkers(restaurants);
-  }, [restaurants, renderMarkers]);
+    if (!searchQuery) {
+      renderMarkers(restaurants);
+      return;
+    }
+    const q = searchQuery.toLowerCase();
+    const filtered = restaurants.filter((r) => {
+      if (!r.locked && "name" in r) {
+        return r.name.toLowerCase().includes(q) || r.address?.toLowerCase().includes(q);
+      }
+      if (r.locked && "areaHint" in r) {
+        return r.areaHint?.toLowerCase().includes(q);
+      }
+      return false;
+    });
+    renderMarkers(filtered);
+  }, [restaurants, searchQuery, renderMarkers]);
 
   // 필터 변경 시 다시 로드
   useEffect(() => {
