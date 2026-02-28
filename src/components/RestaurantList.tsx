@@ -26,19 +26,19 @@ function LockedCard({ restaurant, onUnlock }: { restaurant: LockedRestaurant; on
           </span>
           <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
           <span className="text-[10px] text-ctp-overlay dark:text-tn-fg-dark">{restaurant.areaHint}</span>
-          {restaurant.source && (
-            <>
-              <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
-              <span className="text-[10px] text-ctp-subtext dark:text-tn-fg-dark">
-                {SOURCE_BADGE[restaurant.source] || restaurant.source}{(restaurant.publicVisits ?? 0) > 0 ? ` (${restaurant.publicVisits}회)` : ""}
-              </span>
-            </>
-          )}
           {(restaurant.userVisits ?? 0) > 0 && (
             <>
               <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
               <span className={`text-[10px] font-semibold ${restaurant.grade && restaurant.grade !== 'none' ? GRADE_COLOR[restaurant.grade] : "text-tn-blue"}`}>
                 {restaurant.grade && GRADE_MEDAL[restaurant.grade] ? GRADE_MEDAL[restaurant.grade] + " " : ""}{restaurant.grade && GRADE_LABEL[restaurant.grade] ? GRADE_LABEL[restaurant.grade] + " " : ""}인증 {restaurant.userVisits}회
+              </span>
+            </>
+          )}
+          {restaurant.source && restaurant.source !== "user" && (
+            <>
+              <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
+              <span className="text-[10px] text-ctp-subtext dark:text-tn-fg-dark">
+                {SOURCE_BADGE[restaurant.source] || restaurant.source}{(restaurant.publicVisits ?? 0) > 0 ? ` (${restaurant.publicVisits}회)` : ""}
               </span>
             </>
           )}
@@ -64,12 +64,6 @@ function UnlockedCard({ restaurant, onClick, index }: { restaurant: UnlockedRest
       <div className="flex-1 min-w-0">
         <p className="text-sm font-bold text-ctp-text dark:text-tn-fg-bright truncate">{restaurant.name}</p>
         <div className="flex items-center gap-1.5 mt-0.5">
-          {restaurant.source && (
-            <span className="text-[10px] text-ctp-subtext dark:text-tn-fg-dark">
-              {SOURCE_BADGE[restaurant.source] || restaurant.source}{(restaurant.publicVisits ?? 0) > 0 ? ` (${restaurant.publicVisits}회)` : ""}
-            </span>
-          )}
-          <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
           <span className="text-[10px] text-ctp-subtext dark:text-tn-fg-dark">
             {restaurant.category ? CATEGORY_LABELS[restaurant.category] : "음식점"}
           </span>
@@ -78,6 +72,14 @@ function UnlockedCard({ restaurant, onClick, index }: { restaurant: UnlockedRest
               <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
               <span className={`text-[10px] font-semibold ${restaurant.grade && restaurant.grade !== 'none' ? GRADE_COLOR[restaurant.grade] : "text-tn-blue"}`}>
                 {restaurant.grade && GRADE_MEDAL[restaurant.grade] ? GRADE_MEDAL[restaurant.grade] + " " : ""}{restaurant.grade && GRADE_LABEL[restaurant.grade] ? GRADE_LABEL[restaurant.grade] + " " : ""}인증 {restaurant.userVisits}회
+              </span>
+            </>
+          )}
+          {restaurant.source && restaurant.source !== "user" && (
+            <>
+              <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
+              <span className="text-[10px] text-ctp-subtext dark:text-tn-fg-dark">
+                {SOURCE_BADGE[restaurant.source] || restaurant.source}{(restaurant.publicVisits ?? 0) > 0 ? ` (${restaurant.publicVisits}회)` : ""}
               </span>
             </>
           )}
