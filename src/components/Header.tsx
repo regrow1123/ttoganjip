@@ -15,7 +15,6 @@ export default function Header() {
   return (
     <header className="flex-shrink-0 flex items-center justify-between px-4 py-2.5 bg-white/95 dark:bg-tn-bg/95 backdrop-blur-sm border-b border-gray-100 dark:border-tn-border z-40">
       <div className="flex items-center gap-1.5">
-        <span className="text-lg">🔥</span>
         <h1 className="text-base font-bold text-gray-900 dark:text-tn-fg-bright">또간집</h1>
         <span className="text-[10px] text-gray-400 dark:text-tn-fg-dark ml-1 hidden sm:inline">
           재방문이 증명하는 진짜 맛집
