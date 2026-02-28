@@ -59,27 +59,43 @@ export async function POST(req: NextRequest) {
     const kakaoKey = process.env.KAKAO_REST_API_KEY;
     let kakaoCandidates: any[] = [];
     if (kakaoKey) {
-      // 첫 줄 (보통 상호명)로 검색
-      const searchName = lines[0]?.replace(/[()（）㈜㈱\-]/g, "").trim();
-      if (searchName && searchName.length >= 2) {
+      // 검색 키워드 후보 추출
+      const searchNames: string[] = [];
+      for (const line of lines.slice(0, 3)) {
+        // 괄호 안 텍스트 추출 (실제 상호명인 경우가 많음)
+        const parenMatch = line.match(/[（(]([^)）]+)[)）]/);
+        if (parenMatch) searchNames.push(parenMatch[1].trim());
+        // 줄 전체 (사업자명 등 제거)
+        const cleaned = line.replace(/[()（）㈜㈱\-주식회사(주)]/g, "").trim();
+        if (cleaned.length >= 2 && cleaned.length <= 20) searchNames.push(cleaned);
+      }
+
+      // 중복 제거 후 순서대로 검색
+      const uniqueNames = [...new Set(searchNames)];
+      for (const name of uniqueNames) {
+        if (kakaoCandidates.length >= 3) break;
         try {
           const res = await fetch(
-            `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(searchName)}&category_group_code=FD6,CE7&size=3`,
+            `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(name)}&category_group_code=FD6,CE7&size=3`,
             { headers: { Authorization: `KakaoAK ${kakaoKey}` } }
           );
           if (res.ok) {
             const data = await res.json();
-            kakaoCandidates = (data.documents || []).map((d: any) => ({
-              placeId: d.id,
-              name: d.place_name,
-              address: d.road_address_name || d.address_name,
-              category: d.category_group_code === "CE7" ? "cafe" : "korean",
-              lat: parseFloat(d.y),
-              lng: parseFloat(d.x),
-            }));
+            const newCandidates = (data.documents || [])
+              .filter((d: any) => !kakaoCandidates.some((c: any) => c.placeId === d.id))
+              .map((d: any) => ({
+                placeId: d.id,
+                name: d.place_name,
+                address: d.road_address_name || d.address_name,
+                category: d.category_group_code === "CE7" ? "cafe" : "korean",
+                lat: parseFloat(d.y),
+                lng: parseFloat(d.x),
+              }));
+            kakaoCandidates.push(...newCandidates);
           }
         } catch {}
       }
+      kakaoCandidates = kakaoCandidates.slice(0, 5);
     }
 
     return NextResponse.json({
