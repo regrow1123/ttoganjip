@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
+import BottomNav from "@/components/BottomNav";
 
 export const metadata: Metadata = {
   title: "또간집 - 재방문이 증명하는 진짜 맛집",
@@ -29,7 +30,10 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased bg-white dark:bg-tn-bg text-gray-900 dark:text-tn-fg">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          {children}
+          <BottomNav />
+        </ThemeProvider>
       </body>
     </html>
   );

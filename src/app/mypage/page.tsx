@@ -267,7 +267,7 @@ export default function MyPage() {
       </div>
 
       {/* 로그아웃 */}
-      <div className="px-4 pb-8">
+      <div className="px-4 pb-20">
         <button
           onClick={() => { logout(); router.push("/"); }}
           className="w-full py-3 text-sm text-red-500 dark:text-tn-red bg-ctp-base dark:bg-tn-bg-card rounded-xl border border-ctp-surface0 dark:border-tn-border hover:bg-red-50 dark:hover:bg-tn-red/10 transition"

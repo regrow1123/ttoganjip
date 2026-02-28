@@ -147,7 +147,7 @@ export default function ReceiptPage() {
         <h1 className="text-base font-bold text-ctp-text dark:text-tn-fg-bright">📸 영수증 인증</h1>
       </header>
 
-      <div className="p-4 flex flex-col gap-4 max-w-md mx-auto">
+      <div className="p-4 pb-20 flex flex-col gap-4 max-w-md mx-auto">
         {/* 안내 */}
         <div className="bg-blue-50 dark:bg-tn-blue/10 rounded-xl p-4">
           <h2 className="text-sm font-bold text-tn-blue dark:text-tn-blue mb-1">방문 인증하고 포인트 받기!</h2>
