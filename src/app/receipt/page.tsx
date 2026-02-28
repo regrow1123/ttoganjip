@@ -32,22 +32,24 @@ export default function ReceiptPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [ocrProgress, setOcrProgress] = useState(0);
   const [result, setResult] = useState<VerifyResult | null>(null);
   const [lastOcrText, setLastOcrText] = useState("");
 
   const handleFile = (file: File) => {
-    setSelectedFile(file);
     setPreview(URL.createObjectURL(file));
     setStatus("idle");
     setResult(null);
+    // 즉시 dataURL로 변환해서 저장
+    const reader = new FileReader();
+    reader.onload = () => setDataUrl(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
   const handleVerify = async () => {
-    const file = selectedFile;
-    if (!file) return;
+    if (!dataUrl) return;
 
     // 1) 브라우저 OCR
     setStatus("ocr");
@@ -55,14 +57,6 @@ export default function ReceiptPage() {
 
     let ocrText = "";
     try {
-      // File → base64 Data URL로 변환
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = () => reject(new Error("파일 읽기 실패"));
-        reader.readAsDataURL(file);
-      });
-
       const worker = await createWorker("kor+eng", 1, {
         logger: (m) => {
           if (m.status === "recognizing text") {
@@ -137,7 +131,7 @@ export default function ReceiptPage() {
 
   const reset = () => {
     setPreview(null);
-    setSelectedFile(null);
+    setDataUrl(null);
     setStatus("idle");
     setResult(null);
     setOcrProgress(0);
