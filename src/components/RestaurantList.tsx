@@ -234,6 +234,10 @@ export default function RestaurantList() {
             ))}
           </>
         )}
+
+        {unlockTarget && (
+          <UnlockModal restaurant={unlockTarget} userPoints={points} onConfirm={handleConfirmUnlock} onClose={() => setUnlockTarget(null)} />
+        )}
       </div>
     );
   }
