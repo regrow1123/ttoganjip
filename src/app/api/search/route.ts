@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { db } from "@/db";
-import { restaurants, restaurantStats } from "@/db/schema";
+import { restaurants, restaurantStats, unlocks } from "@/db/schema";
 import { ilike, eq, and, gte, lte } from "drizzle-orm";
 
 const KAKAO_REST_KEY = process.env.KAKAO_REST_API_KEY!;
@@ -43,6 +44,18 @@ export async function GET(req: NextRequest) {
     .where(and(...conditions))
     .limit(5);
 
+  // 열람 여부 확인
+  const cookieStore = await cookies();
+  const userId = cookieStore.get("demo_user_id")?.value;
+  let unlockedIds = new Set<string>();
+  if (userId) {
+    const userUnlocks = await db
+      .select({ restaurantId: unlocks.restaurantId })
+      .from(unlocks)
+      .where(eq(unlocks.userId, userId));
+    unlockedIds = new Set(userUnlocks.map((u) => u.restaurantId));
+  }
+
   const dbPlaceIds = new Set(dbResults.map((r) => r.placeId).filter(Boolean));
 
   // 2) 카카오 키워드 검색 (뷰포트 rect 제한)
@@ -68,18 +81,22 @@ export async function GET(req: NextRequest) {
 
   const data = await res.json();
 
-  const dbMapped = dbResults.map((r) => ({
-    id: r.id,
-    name: r.name,
-    address: r.address,
-    category: r.category,
-    source: r.source,
-    lat: r.lat ? parseFloat(String(r.lat)) : null,
-    lng: r.lng ? parseFloat(String(r.lng)) : null,
-    totalVisits: r.totalVisits || 0,
-    placeUrl: r.placeId ? `https://place.map.kakao.com/${r.placeId}` : null,
-    inDb: true,
-  }));
+  const dbMapped = dbResults.map((r) => {
+    const isUnlocked = unlockedIds.has(r.id);
+    return {
+      id: r.id,
+      name: isUnlocked ? r.name : "🔒 잠긴 맛집",
+      address: isUnlocked ? r.address : (r.address?.split(" ").slice(0, 2).join(" ") || ""),
+      category: r.category,
+      source: r.source,
+      lat: r.lat ? parseFloat(String(r.lat)) : null,
+      lng: r.lng ? parseFloat(String(r.lng)) : null,
+      totalVisits: r.totalVisits || 0,
+      placeUrl: isUnlocked && r.placeId ? `https://place.map.kakao.com/${r.placeId}` : null,
+      locked: !isUnlocked,
+      inDb: true,
+    };
+  });
 
   const kakaoMapped = data.documents
     .filter((d: any) => !dbPlaceIds.has(d.id))

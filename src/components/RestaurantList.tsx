@@ -163,24 +163,33 @@ export default function RestaurantList() {
           <>
             <h2 className="text-xs font-semibold text-orange-500 py-1">🔥 또간집 등록 맛집 ({searchDbResults.length})</h2>
             {searchDbResults.map((r, idx) => (
-              <a
+              <div
                 key={r.id}
-                href={r.placeUrl || "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-tn-orange/10 border border-orange-100 dark:border-tn-orange/20 rounded-xl hover:border-orange-200 transition"
+                onClick={() => !r.locked && r.placeUrl && window.open(r.placeUrl, "_blank")}
+                className={`flex items-center gap-3 p-3 rounded-xl transition ${
+                  r.locked
+                    ? "bg-white dark:bg-tn-bg-card border border-gray-100 dark:border-tn-border"
+                    : "bg-orange-50 dark:bg-tn-orange/10 border border-orange-100 dark:border-tn-orange/20 hover:border-orange-200 cursor-pointer"
+                }`}
               >
-                <div className="flex-shrink-0 w-7 h-7 bg-[#FF6B35] rounded-full flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">{idx + 1}</span>
+                <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${
+                  r.locked ? "bg-gray-300 dark:bg-tn-fg-dark" : "bg-[#FF6B35]"
+                }`}>
+                  <span className="text-xs font-bold text-white">{r.locked ? "🔒" : idx + 1}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-gray-900 dark:text-tn-fg-bright truncate">
-                    {SOURCE_LABEL[r.source] || ""} {r.name}
+                  <p className={`text-sm font-bold truncate ${
+                    r.locked ? "text-gray-400 dark:text-tn-fg-dark" : "text-gray-900 dark:text-tn-fg-bright"
+                  }`}>
+                    {r.locked ? "🔒 잠긴 맛집" : `${SOURCE_LABEL[r.source] || ""} ${r.name}`}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-tn-fg-dark truncate">{r.address}</p>
                 </div>
-                <span className="text-xs font-semibold text-orange-500 flex-shrink-0">🔥 {r.totalVisits}회</span>
-              </a>
+                <div className="flex flex-col items-end flex-shrink-0">
+                  <span className="text-xs font-semibold text-orange-500">🔥 {r.totalVisits}회</span>
+                  {r.locked && <span className="text-[10px] text-orange-500 mt-0.5">5P 열람</span>}
+                </div>
+              </div>
             ))}
           </>
         )}

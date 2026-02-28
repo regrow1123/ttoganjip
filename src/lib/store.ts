@@ -31,6 +31,7 @@ export interface SearchDbResult {
   lng: number | null;
   totalVisits: number;
   placeUrl: string | null;
+  locked: boolean;
   inDb: true;
 }
 
