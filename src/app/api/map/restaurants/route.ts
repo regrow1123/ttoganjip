@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/index";
-import { restaurants, restaurantStats, unlocks } from "@/db/schema";
+import { restaurants, restaurantStats, unlocks, visits } from "@/db/schema";
 import { and, gte, lte, eq, sql, inArray } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
@@ -64,7 +64,14 @@ export async function GET(req: NextRequest) {
       .select({ restaurantId: unlocks.restaurantId })
       .from(unlocks)
       .where(eq(unlocks.userId, userId));
-    unlockedIds = new Set(userUnlocks.map((u) => u.restaurantId));
+    const userVisits = await db
+      .select({ restaurantId: visits.restaurantId })
+      .from(visits)
+      .where(eq(visits.userId, userId));
+    unlockedIds = new Set([
+      ...userUnlocks.map((u) => u.restaurantId),
+      ...userVisits.map((v) => v.restaurantId),
+    ]);
   }
 
   const result = rows.map((r) => {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { db } from "@/db";
-import { restaurants, restaurantStats, unlocks } from "@/db/schema";
+import { restaurants, restaurantStats, unlocks, visits } from "@/db/schema";
 import { ilike, eq, and, gte, lte } from "drizzle-orm";
 
 const KAKAO_REST_KEY = process.env.KAKAO_REST_API_KEY!;
@@ -53,7 +53,14 @@ export async function GET(req: NextRequest) {
       .select({ restaurantId: unlocks.restaurantId })
       .from(unlocks)
       .where(eq(unlocks.userId, userId));
-    unlockedIds = new Set(userUnlocks.map((u) => u.restaurantId));
+    const userVisits = await db
+      .select({ restaurantId: visits.restaurantId })
+      .from(visits)
+      .where(eq(visits.userId, userId));
+    unlockedIds = new Set([
+      ...userUnlocks.map((u) => u.restaurantId),
+      ...userVisits.map((v) => v.restaurantId),
+    ]);
   }
 
   const dbPlaceIds = new Set(dbResults.map((r) => r.placeId).filter(Boolean));
