@@ -7,7 +7,7 @@ import RestaurantList from "./RestaurantList";
 
 export default function DesktopSidebar() {
   return (
-    <aside className="hidden md:flex md:flex-col w-[380px] border-l border-gray-200 dark:border-tn-border bg-white dark:bg-tn-bg overflow-hidden">
+    <aside className="hidden md:flex md:flex-col w-[380px] border-l border-ctp-surface0 dark:border-tn-border bg-ctp-base dark:bg-tn-bg overflow-hidden">
       <SearchBar />
       <SourceTabs />
       <CategoryFilter />

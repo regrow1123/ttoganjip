@@ -12,19 +12,19 @@ function LockedCard({ restaurant, onUnlock }: { restaurant: LockedRestaurant; on
   return (
     <div
       onClick={() => onUnlock(restaurant.id)}
-      className="flex items-center gap-3 p-3 bg-white dark:bg-tn-bg-card border border-gray-100 dark:border-tn-border rounded-xl hover:border-tn-blue dark:hover:border-tn-blue transition cursor-pointer"
+      className="flex items-center gap-3 p-3 bg-ctp-base dark:bg-tn-bg-card border border-ctp-surface0 dark:border-tn-border rounded-xl hover:border-tn-blue dark:hover:border-tn-blue transition cursor-pointer"
     >
       <div className="flex-shrink-0 w-7 h-7 bg-gray-300 dark:bg-tn-fg-dark rounded-full flex items-center justify-center">
         <span className="text-[10px]">🔒</span>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-gray-400 dark:text-tn-fg-dark truncate">잠긴 맛집</p>
+        <p className="text-sm font-bold text-ctp-overlay dark:text-tn-fg-dark truncate">잠긴 맛집</p>
         <div className="flex items-center gap-1.5 mt-0.5">
-          <span className="text-[10px] text-gray-500 dark:text-tn-fg-dark">
+          <span className="text-[10px] text-ctp-subtext dark:text-tn-fg-dark">
             {restaurant.category ? CATEGORY_LABELS[restaurant.category] : "음식점"}
           </span>
           <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
-          <span className="text-[10px] text-gray-400 dark:text-tn-fg-dark">{restaurant.areaHint}</span>
+          <span className="text-[10px] text-ctp-overlay dark:text-tn-fg-dark">{restaurant.areaHint}</span>
           <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
           <span className="text-[10px] font-semibold text-tn-blue">🔥 {restaurant.revisitScore}회</span>
         </div>
@@ -47,21 +47,21 @@ function UnlockedCard({ restaurant, onClick, index }: { restaurant: UnlockedRest
         <span className="text-xs font-bold text-white">{index}</span>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-gray-900 dark:text-tn-fg-bright truncate">{restaurant.name}</p>
+        <p className="text-sm font-bold text-ctp-text dark:text-tn-fg-bright truncate">{restaurant.name}</p>
         <div className="flex items-center gap-1.5 mt-0.5">
           {restaurant.source && (
-            <span className="text-[10px] text-gray-500 dark:text-tn-fg-dark">
+            <span className="text-[10px] text-ctp-subtext dark:text-tn-fg-dark">
               {SOURCE_BADGE[restaurant.source] || restaurant.source}
             </span>
           )}
           <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
-          <span className="text-[10px] text-gray-500 dark:text-tn-fg-dark">
+          <span className="text-[10px] text-ctp-subtext dark:text-tn-fg-dark">
             {restaurant.category ? CATEGORY_LABELS[restaurant.category] : "음식점"}
           </span>
           <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
           <span className="text-[10px] font-semibold text-tn-blue">🔥 {restaurant.revisitScore}회</span>
         </div>
-        <p className="text-[10px] text-gray-400 dark:text-tn-fg-dark truncate mt-0.5">{restaurant.address}</p>
+        <p className="text-[10px] text-ctp-overlay dark:text-tn-fg-dark truncate mt-0.5">{restaurant.address}</p>
       </div>
     </div>
   );
@@ -151,7 +151,7 @@ export default function RestaurantList() {
       return (
         <div className="flex items-center justify-center py-8">
           <div className="w-5 h-5 border-2 border-tn-blue border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-gray-400 dark:text-tn-fg-dark ml-2">검색 중...</span>
+          <span className="text-sm text-ctp-overlay dark:text-tn-fg-dark ml-2">검색 중...</span>
         </div>
       );
     }
@@ -160,7 +160,7 @@ export default function RestaurantList() {
       return (
         <div className="flex flex-col items-center justify-center py-12 px-4">
           <span className="text-3xl mb-2">🔍</span>
-          <p className="text-sm text-gray-400 dark:text-tn-fg-dark text-center">
+          <p className="text-sm text-ctp-overlay dark:text-tn-fg-dark text-center">
             &ldquo;{searchQuery}&rdquo; 검색 결과가 없어요.
           </p>
         </div>
@@ -186,7 +186,7 @@ export default function RestaurantList() {
                 }}
                 className={`flex items-center gap-3 p-3 rounded-xl transition ${
                   r.locked
-                    ? "bg-white dark:bg-tn-bg-card border border-gray-100 dark:border-tn-border"
+                    ? "bg-ctp-base dark:bg-tn-bg-card border border-ctp-surface0 dark:border-tn-border"
                     : "bg-blue-50 dark:bg-tn-blue/10 border border-blue-100 dark:border-tn-blue/20 hover:border-tn-blue cursor-pointer"
                 }`}
               >
@@ -197,24 +197,24 @@ export default function RestaurantList() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-bold truncate ${
-                    r.locked ? "text-gray-400 dark:text-tn-fg-dark" : "text-gray-900 dark:text-tn-fg-bright"
+                    r.locked ? "text-ctp-overlay dark:text-tn-fg-dark" : "text-ctp-text dark:text-tn-fg-bright"
                   }`}>
                     {r.locked ? "잠긴 맛집" : r.name}
                   </p>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     {!r.locked && r.source && (
-                      <span className="text-[10px] text-gray-500 dark:text-tn-fg-dark">
+                      <span className="text-[10px] text-ctp-subtext dark:text-tn-fg-dark">
                         {SOURCE_LABEL[r.source] || r.source}
                       </span>
                     )}
                     {!r.locked && r.source && <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>}
-                    <span className="text-[10px] text-gray-500 dark:text-tn-fg-dark">
+                    <span className="text-[10px] text-ctp-subtext dark:text-tn-fg-dark">
                       {CATEGORY_LABELS[r.category as keyof typeof CATEGORY_LABELS] || r.category || "음식점"}
                     </span>
                     <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
                     <span className="text-[10px] font-semibold text-tn-blue">🔥 {r.totalVisits}회</span>
                   </div>
-                  <p className="text-[10px] text-gray-400 dark:text-tn-fg-dark truncate mt-0.5">{r.address}</p>
+                  <p className="text-[10px] text-ctp-overlay dark:text-tn-fg-dark truncate mt-0.5">{r.address}</p>
                 </div>
                 {r.locked && <span className="flex-shrink-0 text-[10px] text-tn-blue font-medium">5P 열람</span>}
               </div>
@@ -224,18 +224,18 @@ export default function RestaurantList() {
 
         {searchKakaoResults.length > 0 && (
           <>
-            <h2 className="text-xs font-semibold text-gray-400 dark:text-tn-fg-dark py-1 mt-1">📍 카카오맵 검색 ({searchKakaoResults.length})</h2>
+            <h2 className="text-xs font-semibold text-ctp-overlay dark:text-tn-fg-dark py-1 mt-1">📍 카카오맵 검색 ({searchKakaoResults.length})</h2>
             {searchKakaoResults.map((r) => (
               <a
                 key={r.placeId}
                 href={r.placeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-3 bg-white dark:bg-tn-bg-card border border-gray-100 dark:border-tn-border rounded-xl hover:border-gray-200 transition"
+                className="flex items-center gap-3 p-3 bg-ctp-base dark:bg-tn-bg-card border border-ctp-surface0 dark:border-tn-border rounded-xl hover:border-ctp-surface0 transition"
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-700 dark:text-tn-fg truncate">{r.name}</p>
-                  <p className="text-[10px] text-gray-400 dark:text-tn-fg-dark truncate">{r.address}</p>
+                  <p className="text-sm text-ctp-text dark:text-tn-fg truncate">{r.name}</p>
+                  <p className="text-[10px] text-ctp-overlay dark:text-tn-fg-dark truncate">{r.address}</p>
                 </div>
                 <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark flex-shrink-0">카카오맵 →</span>
               </a>
@@ -255,7 +255,7 @@ export default function RestaurantList() {
     return (
       <div className="flex items-center justify-center py-8">
         <div className="w-5 h-5 border-2 border-tn-blue border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm text-gray-400 dark:text-tn-fg-dark ml-2">로딩 중...</span>
+        <span className="text-sm text-ctp-overlay dark:text-tn-fg-dark ml-2">로딩 중...</span>
       </div>
     );
   }
@@ -264,7 +264,7 @@ export default function RestaurantList() {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4">
         <span className="text-3xl mb-2">{searchQuery ? "🔍" : "🗺️"}</span>
-        <p className="text-sm text-gray-400 dark:text-tn-fg-dark text-center">
+        <p className="text-sm text-ctp-overlay dark:text-tn-fg-dark text-center">
           {searchQuery
             ? `"${searchQuery}" 검색 결과가 없어요.`
             : "이 지역에 등록된 재방문 맛집이 없어요.\n지도를 이동해보세요!"}
@@ -276,7 +276,7 @@ export default function RestaurantList() {
   return (
     <div className="flex flex-col gap-2 px-4 pb-4">
       <div className="flex items-center justify-between py-1">
-        <h2 className="text-xs font-semibold text-gray-400 dark:text-tn-fg-dark">
+        <h2 className="text-xs font-semibold text-ctp-overlay dark:text-tn-fg-dark">
           재방문 맛집 {sorted.length}곳{searchQuery && ` (검색: ${searchQuery})`}
         </h2>
       </div>

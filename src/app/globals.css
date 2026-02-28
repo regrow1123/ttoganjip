@@ -2,23 +2,32 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Tokyo Night Theme */
+/* Catppuccin Theme — Latte (light) mapped to default, Mocha (dark) mapped to tn-* */
 @theme {
-  --color-tn-bg: #1a1b27;
-  --color-tn-bg-alt: #24283b;
-  --color-tn-bg-highlight: #292e42;
-  --color-tn-bg-card: #1f2335;
-  --color-tn-border: #3b4261;
-  --color-tn-fg: #a9b1d6;
-  --color-tn-fg-dark: #565f89;
-  --color-tn-fg-bright: #c0caf5;
-  --color-tn-blue: #7aa2f7;
-  --color-tn-cyan: #7dcfff;
-  --color-tn-green: #9ece6a;
-  --color-tn-orange: #ff9e64;
-  --color-tn-red: #f7768e;
-  --color-tn-magenta: #bb9af7;
-  --color-tn-yellow: #e0af68;
+  /* Catppuccin Mocha (dark mode) */
+  --color-tn-bg: #1e1e2e;
+  --color-tn-bg-alt: #181825;
+  --color-tn-bg-highlight: #313244;
+  --color-tn-bg-card: #24243e;
+  --color-tn-border: #45475a;
+  --color-tn-fg: #bac2de;
+  --color-tn-fg-dark: #6c7086;
+  --color-tn-fg-bright: #cdd6f4;
+  --color-tn-blue: #89b4fa;
+  --color-tn-cyan: #94e2d5;
+  --color-tn-green: #a6e3a1;
+  --color-tn-orange: #fab387;
+  --color-tn-red: #f38ba8;
+  --color-tn-magenta: #cba6f7;
+  --color-tn-yellow: #f9e2af;
+  /* Catppuccin Latte (light mode) accent */
+  --color-ctp-blue: #1e66f5;
+  --color-ctp-surface0: #ccd0da;
+  --color-ctp-base: #eff1f5;
+  --color-ctp-mantle: #e6e9ef;
+  --color-ctp-text: #4c4f69;
+  --color-ctp-subtext: #6c6f85;
+  --color-ctp-overlay: #9ca0b0;
 }
 
 @keyframes slide-up {

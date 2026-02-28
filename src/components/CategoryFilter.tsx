@@ -24,7 +24,7 @@ export default function CategoryFilter() {
         className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition ${
           categoryFilter === null
             ? "bg-tn-blue text-white"
-            : "bg-gray-100 dark:bg-tn-bg-card text-gray-600 dark:text-tn-fg-dark hover:bg-gray-200 dark:hover:bg-tn-bg-highlight"
+            : "bg-ctp-mantle dark:bg-tn-bg-card text-ctp-subtext dark:text-tn-fg-dark hover:bg-ctp-surface0 dark:hover:bg-tn-bg-highlight"
         }`}
       >
         전체
@@ -38,7 +38,7 @@ export default function CategoryFilter() {
           className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition ${
             categoryFilter === cat
               ? "bg-tn-blue text-white"
-              : "bg-gray-100 dark:bg-tn-bg-card text-gray-600 dark:text-tn-fg-dark hover:bg-gray-200 dark:hover:bg-tn-bg-highlight"
+              : "bg-ctp-mantle dark:bg-tn-bg-card text-ctp-subtext dark:text-tn-fg-dark hover:bg-ctp-surface0 dark:hover:bg-tn-bg-highlight"
           }`}
         >
           {CATEGORY_EMOJI[cat]} {CATEGORY_LABELS[cat]}

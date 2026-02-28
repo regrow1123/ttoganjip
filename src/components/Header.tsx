@@ -13,10 +13,10 @@ export default function Header() {
   }, [fetchMe]);
 
   return (
-    <header className="flex-shrink-0 flex items-center justify-between px-4 py-2.5 bg-white/95 dark:bg-tn-bg/95 backdrop-blur-sm border-b border-gray-100 dark:border-tn-border z-40">
+    <header className="flex-shrink-0 flex items-center justify-between px-4 py-2.5 bg-ctp-base/95 dark:bg-tn-bg/95 backdrop-blur-sm border-b border-ctp-surface0 dark:border-tn-border z-40">
       <div className="flex items-center gap-1.5">
-        <h1 className="text-base font-bold text-gray-900 dark:text-tn-fg-bright">또간집</h1>
-        <span className="text-[10px] text-gray-400 dark:text-tn-fg-dark ml-1 hidden sm:inline">
+        <h1 className="text-base font-bold text-ctp-text dark:text-tn-fg-bright">또간집</h1>
+        <span className="text-[10px] text-ctp-overlay dark:text-tn-fg-dark ml-1 hidden sm:inline">
           재방문이 증명하는 진짜 맛집
         </span>
       </div>
@@ -34,7 +34,7 @@ export default function Header() {
             </button>
             <button
               onClick={() => router.push("/mypage")}
-              className="text-xs bg-gray-100 dark:bg-tn-bg-card text-gray-700 dark:text-tn-fg px-3 py-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-tn-bg-highlight transition"
+              className="text-xs bg-ctp-mantle dark:bg-tn-bg-card text-ctp-text dark:text-tn-fg px-3 py-1.5 rounded-full hover:bg-ctp-surface0 dark:hover:bg-tn-bg-highlight transition"
             >
               MY
             </button>
