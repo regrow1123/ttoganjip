@@ -27,6 +27,8 @@ export interface SearchDbResult {
   address: string;
   category: string;
   source: string;
+  lat: number | null;
+  lng: number | null;
   totalVisits: number;
   placeUrl: string | null;
   inDb: true;

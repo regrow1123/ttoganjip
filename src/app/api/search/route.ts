@@ -34,6 +34,8 @@ export async function GET(req: NextRequest) {
       category: restaurants.category,
       source: restaurants.source,
       placeId: restaurants.placeId,
+      lat: restaurants.lat,
+      lng: restaurants.lng,
       totalVisits: restaurantStats.totalVisits,
     })
     .from(restaurants)
@@ -59,7 +61,7 @@ export async function GET(req: NextRequest) {
   if (!res.ok) {
     console.error("Kakao API error:", res.status, await res.text());
     return NextResponse.json({
-      db: dbResults.map((r) => ({ ...r, totalVisits: r.totalVisits || 0, placeUrl: r.placeId ? `https://place.map.kakao.com/${r.placeId}` : null, inDb: true })),
+      db: dbResults.map((r) => ({ ...r, lat: r.lat ? parseFloat(String(r.lat)) : null, lng: r.lng ? parseFloat(String(r.lng)) : null, totalVisits: r.totalVisits || 0, placeUrl: r.placeId ? `https://place.map.kakao.com/${r.placeId}` : null, inDb: true })),
       kakao: [],
     });
   }
@@ -72,6 +74,8 @@ export async function GET(req: NextRequest) {
     address: r.address,
     category: r.category,
     source: r.source,
+    lat: r.lat ? parseFloat(String(r.lat)) : null,
+    lng: r.lng ? parseFloat(String(r.lng)) : null,
     totalVisits: r.totalVisits || 0,
     placeUrl: r.placeId ? `https://place.map.kakao.com/${r.placeId}` : null,
     inDb: true,

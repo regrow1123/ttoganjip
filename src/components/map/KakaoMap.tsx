@@ -17,7 +17,7 @@ export default function KakaoMap() {
   const markersRef = useRef<any[]>([]);
   const overlaysRef = useRef<any[]>([]);
   const { setBounds, setCenter, setLevel } = useMapStore();
-  const { restaurants, setRestaurants, setLoading, setSelectedId, categoryFilter, sourceFilter, searchQuery } =
+  const { restaurants, setRestaurants, setLoading, setSelectedId, categoryFilter, sourceFilter, searchQuery, searchDbResults } =
     useRestaurantStore();
 
   // 마커 전부 제거
@@ -162,6 +162,22 @@ export default function KakaoMap() {
 
   // restaurants 또는 검색어 변경 시 마커 업데이트
   useEffect(() => {
+    // 검색 API 모드: DB 검색 결과를 핀으로 표시
+    if (searchQuery.length >= 2 && searchDbResults.length > 0) {
+      const searchItems = searchDbResults
+        .filter((r) => r.lat && r.lng)
+        .map((r, idx) => ({
+          id: r.id,
+          name: r.name,
+          address: r.address,
+          location: { lat: r.lat!, lng: r.lng! },
+          revisitScore: r.totalVisits,
+          locked: false as const,
+        }));
+      renderMarkers(searchItems as any);
+      return;
+    }
+
     if (!searchQuery) {
       renderMarkers(restaurants);
       return;
@@ -177,7 +193,7 @@ export default function KakaoMap() {
       return false;
     });
     renderMarkers(filtered);
-  }, [restaurants, searchQuery, renderMarkers]);
+  }, [restaurants, searchQuery, searchDbResults, renderMarkers]);
 
   // 필터 변경 시 다시 로드
   useEffect(() => {
