@@ -6,8 +6,8 @@ export default function SearchBar() {
   const { searchQuery, setSearchQuery } = useRestaurantStore();
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2">
-      <div className="flex-1 relative">
+    <div className="px-4 py-2">
+      <div className="relative">
         <input
           type="text"
           value={searchQuery}
@@ -17,6 +17,14 @@ export default function SearchBar() {
         />
         <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-tn-fg-dark text-xs">🔍</span>
         {searchQuery && (
+          <button
+            onClick={() => setSearchQuery("")}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-tn-fg-dark text-xs hover:text-gray-600"
+          >
+            ✕
+          </button>
+        )}
+      </div>
     </div>
   );
 }
