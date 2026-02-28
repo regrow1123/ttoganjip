@@ -43,7 +43,7 @@ const SOURCE_BADGE: Record<string, string> = {
 function UnlockedCard({ restaurant, onClick, index }: { restaurant: UnlockedRestaurant; onClick: () => void; index: number }) {
   return (
     <div onClick={onClick} className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-tn-blue/10 border border-blue-100 dark:border-tn-blue/20 rounded-xl cursor-pointer hover:border-tn-blue dark:hover:border-blue-700 transition">
-      <div className="flex-shrink-0 w-7 h-7 bg-[#FF6B35] rounded-full flex items-center justify-center">
+      <div className="flex-shrink-0 w-7 h-7 bg-tn-blue rounded-full flex items-center justify-center">
         <span className="text-xs font-bold text-white">{index}</span>
       </div>
       <div className="flex-1 min-w-0">
@@ -191,7 +191,7 @@ export default function RestaurantList() {
                 }`}
               >
                 <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${
-                  r.locked ? "bg-gray-300 dark:bg-tn-fg-dark" : "bg-[#FF6B35]"
+                  r.locked ? "bg-gray-300 dark:bg-tn-fg-dark" : "bg-tn-blue"
                 }`}>
                   <span className="text-xs font-bold text-white">{r.locked ? "🔒" : idx + 1}</span>
                 </div>
