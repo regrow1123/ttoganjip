@@ -3,7 +3,7 @@
 import { useRestaurantStore } from "@/lib/store";
 
 export default function SearchBar() {
-  const { searchQuery, setSearchQuery, sortBy, setSortBy } = useRestaurantStore();
+  const { searchQuery, setSearchQuery } = useRestaurantStore();
 
   return (
     <div className="flex items-center gap-2 px-4 py-2">
@@ -17,21 +17,6 @@ export default function SearchBar() {
         />
         <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-tn-fg-dark text-xs">🔍</span>
         {searchQuery && (
-          <button
-            onClick={() => setSearchQuery("")}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-tn-fg-dark text-xs hover:text-gray-600"
-          >
-            ✕
-          </button>
-        )}
-      </div>
-      <button
-        onClick={() => setSortBy(sortBy === "revisit" ? "name" : "revisit")}
-        className="flex-shrink-0 text-[11px] px-2.5 py-2 rounded-lg bg-gray-100 dark:bg-tn-bg-highlight text-gray-600 dark:text-tn-fg-dark hover:bg-gray-200 dark:hover:bg-tn-bg-highlight transition"
-        title={sortBy === "revisit" ? "재방문순" : "이름순"}
-      >
-        {sortBy === "revisit" ? "🔥 재방문순" : "🔤 이름순"}
-      </button>
     </div>
   );
 }
