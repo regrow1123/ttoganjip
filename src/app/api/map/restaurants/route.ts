@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db/index";
-import { restaurants, restaurantStats, unlocks, visits } from "@/db/schema";
+import { supabase } from "@/lib/supabase-server";
 import { getGrade } from "@/lib/grade";
-import { and, gte, lte, eq, sql, inArray } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   const params = req.nextUrl.searchParams;
@@ -11,76 +9,69 @@ export async function GET(req: NextRequest) {
   const neLat = parseFloat(params.get("neLat") || "0");
   const neLng = parseFloat(params.get("neLng") || "0");
   const category = params.get("category") || null;
-  const source = params.get("source") || null; // 'all' | 'assembly' | 'seoul_expense' | 'user'
+  const source = params.get("source") || null;
   const userId = params.get("userId") || req.cookies.get("demo_user_id")?.value || null;
 
   if (!swLat || !neLat) {
     return NextResponse.json({ error: "bounds required" }, { status: 400 });
   }
 
-  const conditions = [
-    gte(restaurants.lat, swLat),
-    lte(restaurants.lat, neLat),
-    gte(restaurants.lng, swLng),
-    lte(restaurants.lng, neLng),
-    gte(restaurantStats.totalVisits, 2),
-  ];
+  // restaurants + restaurant_stats 조인 쿼리
+  let query = supabase
+    .from("restaurants")
+    .select("id, name, address, category, lat, lng, region, source, restaurant_stats(total_visits, max_revisits, public_visits, user_visits)")
+    .gte("lat", swLat)
+    .lte("lat", neLat)
+    .gte("lng", swLng)
+    .lte("lng", neLng)
+    .gte("restaurant_stats.total_visits", 2)
+    .order("restaurant_stats(total_visits)", { ascending: false })
+    .limit(100);
 
   if (category) {
-    conditions.push(eq(restaurants.category, category));
+    query = query.eq("category", category);
   }
 
-  // source 필터
   if (source && source !== "all") {
     if (source === "public") {
-      // 공공 데이터 전체 (국회의원 + 서울시)
-      conditions.push(inArray(restaurants.source, ["assembly", "seoul_expense"]));
+      query = query.in("source", ["assembly", "seoul_expense"]);
     } else {
-      conditions.push(eq(restaurants.source, source));
+      query = query.eq("source", source);
     }
   }
 
-  const rows = await db
-    .select({
-      id: restaurants.id,
-      name: restaurants.name,
-      address: restaurants.address,
-      category: restaurants.category,
-      lat: restaurants.lat,
-      lng: restaurants.lng,
-      region: restaurants.region,
-      source: restaurants.source,
-      totalVisits: restaurantStats.totalVisits,
-      maxRevisits: restaurantStats.maxRevisits,
-      publicVisits: restaurantStats.publicVisits,
-      userVisits: restaurantStats.userVisits,
-    })
-    .from(restaurants)
-    .innerJoin(restaurantStats, eq(restaurants.id, restaurantStats.restaurantId))
-    .where(and(...conditions))
-    .orderBy(sql`${restaurantStats.totalVisits} desc`)
-    .limit(100);
+  const { data: rows, error } = await query;
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 
+  // total_visits >= 2 필터 (Supabase foreign table filter는 클라이언트 필터일 수 있음)
+  const filtered = (rows || []).filter((r: any) => {
+    const stats = r.restaurant_stats;
+    return stats && stats.total_visits >= 2;
+  });
+
+  // 잠금 해제 ID 조회
   let unlockedIds = new Set<string>();
   if (userId) {
-    const userUnlocks = await db
-      .select({ restaurantId: unlocks.restaurantId })
-      .from(unlocks)
-      .where(eq(unlocks.userId, userId));
-    const userVisits = await db
-      .select({ restaurantId: visits.restaurantId })
-      .from(visits)
-      .where(eq(visits.userId, userId));
+    const { data: userUnlocks } = await supabase
+      .from("unlocks")
+      .select("restaurant_id")
+      .eq("user_id", userId);
+    const { data: userVisits } = await supabase
+      .from("visits")
+      .select("restaurant_id")
+      .eq("user_id", userId);
     unlockedIds = new Set([
-      ...userUnlocks.map((u) => u.restaurantId),
-      ...userVisits.map((v) => v.restaurantId),
+      ...(userUnlocks || []).map((u: any) => u.restaurant_id),
+      ...(userVisits || []).map((v: any) => v.restaurant_id),
     ]);
   }
 
-  const result = rows.map((r) => {
+  const result = filtered.map((r: any) => {
+    const stats = r.restaurant_stats || {};
     const isUnlocked = unlockedIds.has(r.id);
-
-    const grade = getGrade(r.userVisits ?? 0);
+    const grade = getGrade(stats.user_visits ?? 0);
 
     if (isUnlocked) {
       return {
@@ -89,9 +80,9 @@ export async function GET(req: NextRequest) {
         address: r.address,
         category: r.category,
         location: { lat: r.lat, lng: r.lng },
-        revisitScore: r.totalVisits,
-        publicVisits: r.publicVisits ?? 0,
-        userVisits: r.userVisits ?? 0,
+        revisitScore: stats.total_visits,
+        publicVisits: stats.public_visits ?? 0,
+        userVisits: stats.user_visits ?? 0,
         source: r.source,
         grade,
         locked: false,
@@ -101,9 +92,9 @@ export async function GET(req: NextRequest) {
     return {
       id: r.id,
       category: r.category,
-      revisitScore: r.totalVisits,
-      publicVisits: r.publicVisits ?? 0,
-      userVisits: r.userVisits ?? 0,
+      revisitScore: stats.total_visits,
+      publicVisits: stats.public_visits ?? 0,
+      userVisits: stats.user_visits ?? 0,
       areaHint: r.region || "서울",
       source: r.source,
       grade,

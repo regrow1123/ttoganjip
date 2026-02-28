@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db/index";
-import { users, unlocks, restaurants, restaurantStats, pointTransactions, visits } from "@/db/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { supabase } from "@/lib/supabase-server";
 
 export async function GET(req: NextRequest) {
   const userId = req.cookies.get("demo_user_id")?.value;
@@ -10,71 +8,68 @@ export async function GET(req: NextRequest) {
   }
 
   // 유저 기본 정보
-  const [user] = await db
-    .select({ id: users.id, name: users.name, email: users.email, points: users.points, createdAt: users.createdAt })
-    .from(users)
-    .where(eq(users.id, userId));
+  const { data: user } = await supabase
+    .from("users")
+    .select("id, name, email, points, created_at")
+    .eq("id", userId)
+    .single();
 
   if (!user) {
     return NextResponse.json({ error: "유저를 찾을 수 없습니다" }, { status: 404 });
   }
 
-  // 열람한 식당 목록
-  const unlockedRestaurants = await db
-    .select({
-      restaurantId: unlocks.restaurantId,
-      unlockedAt: unlocks.unlockedAt,
-      name: restaurants.name,
-      category: restaurants.category,
-      region: restaurants.region,
-      source: restaurants.source,
-      totalVisits: restaurantStats.totalVisits,
-    })
-    .from(unlocks)
-    .innerJoin(restaurants, eq(unlocks.restaurantId, restaurants.id))
-    .leftJoin(restaurantStats, eq(restaurants.id, restaurantStats.restaurantId))
-    .where(eq(unlocks.userId, userId))
-    .orderBy(desc(unlocks.unlockedAt));
+  // 열람한 식당
+  const { data: unlockedRestaurants } = await supabase
+    .from("unlocks")
+    .select("restaurant_id, unlocked_at, restaurants(name, category, region, source, restaurant_stats(total_visits))")
+    .eq("user_id", userId)
+    .order("unlocked_at", { ascending: false });
 
-  // 포인트 내역
-  const pointHistory = await db
-    .select({
-      amount: pointTransactions.amount,
-      type: pointTransactions.type,
-      createdAt: pointTransactions.createdAt,
-    })
-    .from(pointTransactions)
-    .where(eq(pointTransactions.userId, userId))
-    .orderBy(desc(pointTransactions.createdAt))
-    .limit(20);
-
-  // 인증한 식당 목록
-  const verifiedVisits = await db
-    .select({
-      visitId: visits.id,
-      restaurantId: visits.restaurantId,
-      pointsEarned: visits.pointsEarned,
-      createdAt: visits.createdAt,
-      name: restaurants.name,
-      category: restaurants.category,
-      region: restaurants.region,
-    })
-    .from(visits)
-    .innerJoin(restaurants, eq(visits.restaurantId, restaurants.id))
-    .where(eq(visits.userId, userId))
-    .orderBy(desc(visits.createdAt))
+  // 인증한 식당
+  const { data: verifiedVisits } = await supabase
+    .from("visits")
+    .select("id, restaurant_id, points_earned, created_at, restaurants(name, category, region)")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
     .limit(50);
 
-  // 통계
-  const totalUnlocked = unlockedRestaurants.length;
-  const totalSpent = unlockedRestaurants.length * 5;
-  const totalVisits = verifiedVisits.length;
+  // 포인트 내역
+  const { data: pointHistory } = await supabase
+    .from("point_transactions")
+    .select("amount, type, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  const unlocked = (unlockedRestaurants || []).map((u: any) => ({
+    restaurantId: u.restaurant_id,
+    unlockedAt: u.unlocked_at,
+    name: u.restaurants?.name,
+    category: u.restaurants?.category,
+    region: u.restaurants?.region,
+    source: u.restaurants?.source,
+    totalVisits: u.restaurants?.restaurant_stats?.total_visits ?? 0,
+  }));
+
+  const visits = (verifiedVisits || []).map((v: any) => ({
+    visitId: v.id,
+    restaurantId: v.restaurant_id,
+    pointsEarned: v.points_earned,
+    createdAt: v.created_at,
+    name: v.restaurants?.name,
+    category: v.restaurants?.category,
+    region: v.restaurants?.region,
+  }));
+
+  const totalUnlocked = unlocked.length;
+  const totalSpent = totalUnlocked * 5;
+  const totalVisits = visits.length;
 
   return NextResponse.json({
-    user,
+    user: { id: user.id, name: user.name, email: user.email, points: user.points, createdAt: user.created_at },
     stats: { totalUnlocked, totalSpent, totalVisits },
-    unlockedRestaurants,
-    verifiedVisits,
-    pointHistory,
+    unlockedRestaurants: unlocked,
+    verifiedVisits: visits,
+    pointHistory: pointHistory || [],
   });
 }

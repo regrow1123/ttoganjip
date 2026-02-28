@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db/index";
-import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { supabase } from "@/lib/supabase-server";
 
 export async function GET(req: NextRequest) {
   const userId = req.cookies.get("demo_user_id")?.value;
@@ -9,11 +7,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ user: null });
   }
 
-  const [user] = await db
-    .select({ id: users.id, name: users.name, points: users.points })
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1);
+  const { data: user } = await supabase
+    .from("users")
+    .select("id, name, points")
+    .eq("id", userId)
+    .single();
 
   return NextResponse.json({ user: user || null });
 }

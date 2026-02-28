@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db/index";
-import { restaurants, restaurantStats, assemblyExpenses, assemblyMembers, unlocks } from "@/db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { supabase } from "@/lib/supabase-server";
 
 export async function GET(
   req: NextRequest,
@@ -11,55 +9,56 @@ export async function GET(
   const userId = req.cookies.get("demo_user_id")?.value || null;
 
   // 식당 기본 정보 + 통계
-  const [restaurant] = await db
-    .select({
-      id: restaurants.id,
-      name: restaurants.name,
-      address: restaurants.address,
-      category: restaurants.category,
-      lat: restaurants.lat,
-      lng: restaurants.lng,
-      region: restaurants.region,
-      source: restaurants.source,
-      totalVisits: restaurantStats.totalVisits,
-      uniqueVisitors: restaurantStats.uniqueVisitors,
-      maxRevisits: restaurantStats.maxRevisits,
-    })
-    .from(restaurants)
-    .innerJoin(restaurantStats, eq(restaurants.id, restaurantStats.restaurantId))
-    .where(eq(restaurants.id, id))
-    .limit(1);
+  const { data: restaurant } = await supabase
+    .from("restaurants")
+    .select("id, name, address, category, lat, lng, region, source, place_id, restaurant_stats(total_visits, unique_visitors, max_revisits)")
+    .eq("id", id)
+    .single();
 
   if (!restaurant) {
     return NextResponse.json({ error: "식당을 찾을 수 없습니다" }, { status: 404 });
   }
 
+  const stats = (restaurant as any).restaurant_stats || {};
+
   // 잠금 확인
   let isUnlocked = false;
   if (userId) {
-    const [unlock] = await db
-      .select()
-      .from(unlocks)
-      .where(and(eq(unlocks.userId, userId), eq(unlocks.restaurantId, id)))
-      .limit(1);
-    isUnlocked = !!unlock;
+    const { data: unlock } = await supabase
+      .from("unlocks")
+      .select("user_id")
+      .eq("user_id", userId)
+      .eq("restaurant_id", id)
+      .maybeSingle();
+    if (!unlock) {
+      const { data: visit } = await supabase
+        .from("visits")
+        .select("user_id")
+        .eq("user_id", userId)
+        .eq("restaurant_id", id)
+        .limit(1)
+        .maybeSingle();
+      isUnlocked = !!visit;
+    } else {
+      isUnlocked = true;
+    }
   }
 
-  // 국회의원 업무추진비 내역 (해당되면)
+  // 국회의원 업무추진비
   let expenses: any[] = [];
   if (restaurant.source === "assembly") {
-    expenses = await db
-      .select({
-        date: assemblyExpenses.expenseDate,
-        amount: assemblyExpenses.amount,
-        purpose: assemblyExpenses.purpose,
-        memberName: assemblyMembers.name,
-        party: assemblyMembers.party,
-      })
-      .from(assemblyExpenses)
-      .innerJoin(assemblyMembers, eq(assemblyExpenses.memberId, assemblyMembers.id))
-      .where(eq(assemblyExpenses.restaurantId, id))
-      .orderBy(sql`${assemblyExpenses.expenseDate} DESC`);
+    const { data } = await supabase
+      .from("assembly_expenses")
+      .select("expense_date, amount, purpose, assembly_members(name, party)")
+      .eq("restaurant_id", id)
+      .order("expense_date", { ascending: false });
+    expenses = (data || []).map((e: any) => ({
+      date: e.expense_date,
+      amount: e.amount,
+      purpose: e.purpose,
+      memberName: e.assembly_members?.name,
+      party: e.assembly_members?.party,
+    }));
   }
 
   if (!isUnlocked) {
@@ -68,22 +67,28 @@ export async function GET(
       category: restaurant.category,
       region: restaurant.region,
       source: restaurant.source,
-      totalVisits: restaurant.totalVisits,
+      totalVisits: stats.total_visits,
       locked: true,
     });
   }
 
-  // placeId 가져오기
-  const [full] = await db
-    .select({ placeId: restaurants.placeId })
-    .from(restaurants)
-    .where(eq(restaurants.id, id));
+  const placeId = restaurant.place_id;
 
   return NextResponse.json({
-    ...restaurant,
-    placeId: full?.placeId || null,
-    kakaoMapUrl: full?.placeId
-      ? `https://place.map.kakao.com/${full.placeId}`
+    id: restaurant.id,
+    name: restaurant.name,
+    address: restaurant.address,
+    category: restaurant.category,
+    lat: restaurant.lat,
+    lng: restaurant.lng,
+    region: restaurant.region,
+    source: restaurant.source,
+    totalVisits: stats.total_visits,
+    uniqueVisitors: stats.unique_visitors,
+    maxRevisits: stats.max_revisits,
+    placeId,
+    kakaoMapUrl: placeId
+      ? `https://place.map.kakao.com/${placeId}`
       : `https://map.kakao.com/?q=${encodeURIComponent(restaurant.name)}`,
     expenses,
     locked: false,

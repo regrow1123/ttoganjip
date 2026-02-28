@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { db } from "@/db";
-import { restaurants, restaurantStats, visits, pointTransactions, users } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { supabase } from "@/lib/supabase-server";
 
 const FIRST_VISIT_POINTS = 10;
 
@@ -18,19 +16,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "식당 정보가 부족합니다" }, { status: 400 });
   }
 
-  // 이미 등록된 식당인지 확인 (placeId)
-  const existing = await db
-    .select({ id: restaurants.id })
-    .from(restaurants)
-    .where(eq(restaurants.placeId, placeId))
+  // 이미 등록?
+  const { data: existing } = await supabase
+    .from("restaurants")
+    .select("id")
+    .eq("place_id", placeId)
     .limit(1);
 
   let restaurantId: string;
 
-  if (existing.length > 0) {
+  if (existing && existing.length > 0) {
     restaurantId = existing[0].id;
   } else {
-    // 주소에서 region 추출
     let region = "서울";
     const m = (address || "").match(/서울\S*\s+(\S+[구])/);
     if (m) region = m[1];
@@ -39,68 +36,57 @@ export async function POST(req: NextRequest) {
       if (m2) region = m2[2];
     }
 
-    // 새 식당 등록
-    const [newRestaurant] = await db.insert(restaurants).values({
-      name,
-      address: address || "",
-      category: category || "other",
-      lat,
-      lng,
-      placeId,
-      region,
-      source: "user",
-    }).returning({ id: restaurants.id });
+    const { data: newR } = await supabase
+      .from("restaurants")
+      .insert({ name, address: address || "", category: category || "other", lat, lng, place_id: placeId, region, source: "user" })
+      .select("id")
+      .single();
 
-    restaurantId = newRestaurant.id;
+    if (!newR) return NextResponse.json({ error: "식당 등록 실패" }, { status: 500 });
+    restaurantId = newR.id;
 
-    // stats 생성
-    await db.insert(restaurantStats).values({
-      restaurantId,
-      totalVisits: 0,
-      uniqueVisitors: 0,
-      revisitCount: 0,
+    await supabase.from("restaurant_stats").insert({
+      restaurant_id: restaurantId,
+      total_visits: 0,
+      unique_visitors: 0,
+      revisit_count: 0,
     });
   }
 
   // 방문 기록
-  await db.insert(visits).values({
-    userId,
-    restaurantId,
-    receiptImage: "uploaded",
-    ocrRaw: { text: ocrText || "" },
-    ocrStatus: "verified",
-    pointsEarned: FIRST_VISIT_POINTS,
+  await supabase.from("visits").insert({
+    user_id: userId,
+    restaurant_id: restaurantId,
+    receipt_image: "uploaded",
+    ocr_raw: { text: ocrText || "" },
+    ocr_status: "verified",
+    points_earned: FIRST_VISIT_POINTS,
   });
 
-  await db.insert(pointTransactions).values({
-    userId,
+  await supabase.from("point_transactions").insert({
+    user_id: userId,
     amount: FIRST_VISIT_POINTS,
     type: "visit_first",
   });
 
-  await db
-    .update(users)
-    .set({ points: sql`${users.points} + ${FIRST_VISIT_POINTS}` })
-    .where(eq(users.id, userId));
+  // 포인트 증가
+  const { data: currentUser } = await supabase.from("users").select("points").eq("id", userId).single();
+  await supabase.from("users").update({ points: (currentUser?.points || 0) + FIRST_VISIT_POINTS }).eq("id", userId);
 
-  await db
-    .update(restaurantStats)
-    .set({
-      totalVisits: sql`${restaurantStats.totalVisits} + 1`,
-      userVisits: sql`${restaurantStats.userVisits} + 1`,
-    })
-    .where(eq(restaurantStats.restaurantId, restaurantId));
+  // stats 증가
+  const { data: currentStats } = await supabase.from("restaurant_stats").select("total_visits, user_visits").eq("restaurant_id", restaurantId).single();
+  await supabase.from("restaurant_stats").update({
+    total_visits: (currentStats?.total_visits || 0) + 1,
+    user_visits: (currentStats?.user_visits || 0) + 1,
+  }).eq("restaurant_id", restaurantId);
 
-  const [user] = await db
-    .select({ points: users.points })
-    .from(users)
-    .where(eq(users.id, userId));
+  const { data: updatedUser } = await supabase.from("users").select("points").eq("id", userId).single();
 
   return NextResponse.json({
     success: true,
     restaurant: name,
     isFirstVisit: true,
     pointsEarned: FIRST_VISIT_POINTS,
-    totalPoints: user.points,
+    totalPoints: updatedUser?.points,
   });
 }

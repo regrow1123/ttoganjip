@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { db } from "@/db";
-import { restaurants, restaurantStats, visits, pointTransactions, users } from "@/db/schema";
-import { eq, ilike, sql } from "drizzle-orm";
+import { supabase } from "@/lib/supabase-server";
 
 const FIRST_VISIT_POINTS = 10;
 const REVISIT_POINTS = 20;
@@ -19,35 +17,35 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "영수증 텍스트를 읽을 수 없습니다" }, { status: 400 });
   }
 
-  // 텍스트에서 식당명 매칭
   const lines = ocrText.split("\n").map((l: string) => l.trim()).filter((l: string) => l.length >= 2);
 
   let matchedRestaurant: { id: string; name: string } | null = null;
 
+  // 정방향: OCR 라인으로 DB 검색
   for (const line of lines) {
     if (line.length > 30) continue;
-    const results = await db
-      .select({ id: restaurants.id, name: restaurants.name })
-      .from(restaurants)
-      .where(ilike(restaurants.name, `%${line.replace(/[%_]/g, "")}%`))
+    const { data } = await supabase
+      .from("restaurants")
+      .select("id, name")
+      .ilike("name", `%${line.replace(/[%_]/g, "")}%`)
       .limit(1);
-    if (results.length > 0) {
-      matchedRestaurant = results[0];
+    if (data && data.length > 0) {
+      matchedRestaurant = data[0];
       break;
     }
   }
 
-  // 역방향: DB 식당명이 OCR 텍스트에 포함되는지
+  // 역방향: DB 식당명이 OCR에 포함?
   if (!matchedRestaurant) {
-    const allRestaurants = await db
-      .select({ id: restaurants.id, name: restaurants.name })
-      .from(restaurants)
+    const { data: allR } = await supabase
+      .from("restaurants")
+      .select("id, name")
       .limit(2000);
 
     const normalizedText = ocrText.replace(/\s/g, "").toLowerCase();
-    for (const r of allRestaurants) {
-      const normalizedName = r.name.replace(/\s/g, "").toLowerCase();
-      if (normalizedName.length >= 2 && normalizedText.includes(normalizedName)) {
+    for (const r of allR || []) {
+      const n = r.name.replace(/\s/g, "").toLowerCase();
+      if (n.length >= 2 && normalizedText.includes(n)) {
         matchedRestaurant = r;
         break;
       }
@@ -55,37 +53,22 @@ export async function POST(req: NextRequest) {
   }
 
   if (!matchedRestaurant) {
-    // 카카오 키워드 검색으로 후보 찾기
+    // 카카오 후보 검색
     const kakaoKey = process.env.KAKAO_REST_API_KEY;
     let kakaoCandidates: any[] = [];
     if (kakaoKey) {
-      // 검색 키워드 후보 추출
       const searchNames: string[] = [];
       for (const line of lines.slice(0, 5)) {
-        // 모든 괄호 안 텍스트 추출 (실제 상호명인 경우가 많음)
         const parenMatches = line.matchAll(/[（(]([^)）]{2,})[)）]/g);
         for (const m of parenMatches) {
           const inner = m[1].trim();
-          // (주), 사업자번호 등 제외
-          if (inner.length >= 2 && !/^주$|^\d|사업|번호/.test(inner)) {
-            searchNames.push(inner);
-          }
+          if (inner.length >= 2 && !/^주$|^\d|사업|번호/.test(inner)) searchNames.push(inner);
         }
-        // 법인명 정리: (주), ㈜, 주식회사, 괄호 내용 제거 후 상호명만
-        let cleaned = line
-          .replace(/㈜|㈱|\(주\)|주식회사/g, "")
-          .replace(/[（(][^)）]*[)）]/g, "")  // 괄호+내용 제거
-          .replace(/[—\-–:：]/g, " ")
-          .replace(/사업자?.?번호.*/i, "")
-          .trim();
-        if (cleaned.length >= 2 && cleaned.length <= 20) {
-          searchNames.push(cleaned);
-        }
+        let cleaned = line.replace(/㈜|㈱|\(주\)|주식회사/g, "").replace(/[（(][^)）]*[)）]/g, "").replace(/[—\-–:：]/g, " ").replace(/사업자?.?번호.*/i, "").trim();
+        if (cleaned.length >= 2 && cleaned.length <= 20) searchNames.push(cleaned);
       }
 
-      // 중복 제거 후 순서대로 검색
-      const uniqueNames = [...new Set(searchNames)];
-      for (const name of uniqueNames) {
+      for (const name of [...new Set(searchNames)]) {
         if (kakaoCandidates.length >= 3) break;
         try {
           const res = await fetch(
@@ -94,24 +77,21 @@ export async function POST(req: NextRequest) {
           );
           if (res.ok) {
             const data = await res.json();
-            const newCandidates = (data.documents || [])
+            const newC = (data.documents || [])
               .filter((d: any) => !kakaoCandidates.some((c: any) => c.placeId === d.id))
               .map((d: any) => ({
-                placeId: d.id,
-                name: d.place_name,
+                placeId: d.id, name: d.place_name,
                 address: d.road_address_name || d.address_name,
                 category: d.category_group_code === "CE7" ? "cafe" : d.category_group_code === "FD6" ? "korean" : "other",
-                lat: parseFloat(d.y),
-                lng: parseFloat(d.x),
+                lat: parseFloat(d.y), lng: parseFloat(d.x),
               }));
-            kakaoCandidates.push(...newCandidates);
+            kakaoCandidates.push(...newC);
           }
         } catch {}
       }
       kakaoCandidates = kakaoCandidates.slice(0, 5);
     }
 
-    // 검색 키워드 후보 재추출 (응답에 포함)
     const debugNames: string[] = [];
     for (const line of lines.slice(0, 5)) {
       const pm = line.matchAll(/[（(]([^)）]{2,})[)）]/g);
@@ -132,67 +112,65 @@ export async function POST(req: NextRequest) {
 
   // 같은 날 중복 방지
   const today = new Date().toISOString().split("T")[0];
-  const existingVisit = await db
-    .select()
-    .from(visits)
-    .where(
-      sql`${visits.userId} = ${userId} AND ${visits.restaurantId} = ${matchedRestaurant.id} AND DATE(${visits.createdAt}) = ${today}`
-    )
+  const { data: existingVisit } = await supabase
+    .from("visits")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("restaurant_id", matchedRestaurant.id)
+    .gte("created_at", `${today}T00:00:00`)
+    .lt("created_at", `${today}T23:59:59`)
     .limit(1);
 
-  if (existingVisit.length > 0) {
-    return NextResponse.json({
-      error: "오늘 이미 이 식당의 방문을 인증했습니다",
-      restaurant: matchedRestaurant.name,
-    }, { status: 409 });
+  if (existingVisit && existingVisit.length > 0) {
+    return NextResponse.json({ error: "오늘 이미 이 식당의 방문을 인증했습니다", restaurant: matchedRestaurant.name }, { status: 409 });
   }
 
-  const prevVisits = await db
-    .select()
-    .from(visits)
-    .where(sql`${visits.userId} = ${userId} AND ${visits.restaurantId} = ${matchedRestaurant.id}`);
+  // 첫 방문 여부
+  const { data: prevVisits } = await supabase
+    .from("visits")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("restaurant_id", matchedRestaurant.id)
+    .limit(1);
 
-  const isFirstVisit = prevVisits.length === 0;
+  const isFirstVisit = !prevVisits || prevVisits.length === 0;
   const pointsEarned = isFirstVisit ? FIRST_VISIT_POINTS : REVISIT_POINTS;
 
-  await db.insert(visits).values({
-    userId,
-    restaurantId: matchedRestaurant.id,
-    receiptImage: "uploaded",
-    ocrRaw: { text: ocrText },
-    ocrStatus: "verified",
-    pointsEarned,
+  // visit 기록
+  await supabase.from("visits").insert({
+    user_id: userId,
+    restaurant_id: matchedRestaurant.id,
+    receipt_image: "uploaded",
+    ocr_raw: { text: ocrText },
+    ocr_status: "verified",
+    points_earned: pointsEarned,
   });
 
-  await db.insert(pointTransactions).values({
-    userId,
+  // 포인트 트랜잭션
+  await supabase.from("point_transactions").insert({
+    user_id: userId,
     amount: pointsEarned,
     type: isFirstVisit ? "visit_first" : "visit_revisit",
   });
 
-  await db
-    .update(users)
-    .set({ points: sql`${users.points} + ${pointsEarned}` })
-    .where(eq(users.id, userId));
+  // 포인트 증가
+  const { data: currentUser } = await supabase.from("users").select("points").eq("id", userId).single();
+  await supabase.from("users").update({ points: (currentUser?.points || 0) + pointsEarned }).eq("id", userId);
 
-  await db
-    .update(restaurantStats)
-    .set({
-      totalVisits: sql`${restaurantStats.totalVisits} + 1`,
-      userVisits: sql`${restaurantStats.userVisits} + 1`,
-    })
-    .where(eq(restaurantStats.restaurantId, matchedRestaurant.id));
+  // stats 증가
+  const { data: currentStats } = await supabase.from("restaurant_stats").select("total_visits, user_visits").eq("restaurant_id", matchedRestaurant.id).single();
+  await supabase.from("restaurant_stats").update({
+    total_visits: (currentStats?.total_visits || 0) + 1,
+    user_visits: (currentStats?.user_visits || 0) + 1,
+  }).eq("restaurant_id", matchedRestaurant.id);
 
-  const [user] = await db
-    .select({ points: users.points })
-    .from(users)
-    .where(eq(users.id, userId));
+  const { data: updatedUser } = await supabase.from("users").select("points").eq("id", userId).single();
 
   return NextResponse.json({
     success: true,
     restaurant: matchedRestaurant.name,
     isFirstVisit,
     pointsEarned,
-    totalPoints: user.points,
+    totalPoints: updatedUser?.points,
   });
 }

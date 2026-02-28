@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db/index";
-import { restaurants, users, unlocks, pointTransactions } from "@/db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { supabase } from "@/lib/supabase-server";
 import { POINTS } from "@/lib/points";
 
 export async function POST(
@@ -9,8 +7,6 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: restaurantId } = await params;
-
-  // TODO: NextAuth 세션에서 userId 가져오기
   const body = await req.json().catch(() => ({}));
   const userId = body.userId || req.cookies.get("demo_user_id")?.value;
 
@@ -18,28 +14,29 @@ export async function POST(
     return NextResponse.json({ error: "로그인이 필요합니다" }, { status: 401 });
   }
 
-  // 이미 열람한 식당인지 확인
-  const existing = await db
-    .select()
-    .from(unlocks)
-    .where(and(eq(unlocks.userId, userId), eq(unlocks.restaurantId, restaurantId)))
-    .limit(1);
+  // 이미 열람?
+  const { data: existing } = await supabase
+    .from("unlocks")
+    .select("user_id")
+    .eq("user_id", userId)
+    .eq("restaurant_id", restaurantId)
+    .maybeSingle();
 
-  if (existing.length > 0) {
-    // 이미 열람 — 식당 정보 바로 반환
-    const [restaurant] = await db
-      .select()
-      .from(restaurants)
-      .where(eq(restaurants.id, restaurantId));
-
+  if (existing) {
+    const { data: restaurant } = await supabase
+      .from("restaurants")
+      .select("*")
+      .eq("id", restaurantId)
+      .single();
     return NextResponse.json({ restaurant, alreadyUnlocked: true });
   }
 
   // 포인트 확인
-  const [user] = await db
-    .select({ points: users.points })
-    .from(users)
-    .where(eq(users.id, userId));
+  const { data: user } = await supabase
+    .from("users")
+    .select("points")
+    .eq("id", userId)
+    .single();
 
   if (!user || user.points < POINTS.UNLOCK_COST) {
     return NextResponse.json(
@@ -48,37 +45,43 @@ export async function POST(
     );
   }
 
-  // 포인트 차감 + unlock 기록 + 트랜잭션 기록 (atomic)
-  await db.update(users).set({
-    points: sql`${users.points} - ${POINTS.UNLOCK_COST}`,
-  }).where(eq(users.id, userId));
+  // 포인트 차감
+  await supabase
+    .from("users")
+    .update({ points: user.points - POINTS.UNLOCK_COST })
+    .eq("id", userId);
 
-  await db.insert(unlocks).values({
-    userId,
-    restaurantId,
-  });
+  // unlock 기록
+  await supabase
+    .from("unlocks")
+    .insert({ user_id: userId, restaurant_id: restaurantId });
 
-  await db.insert(pointTransactions).values({
-    userId,
-    amount: -POINTS.UNLOCK_COST,
-    type: "unlock",
-    referenceId: restaurantId,
-  });
+  // 트랜잭션 기록
+  await supabase
+    .from("point_transactions")
+    .insert({
+      user_id: userId,
+      amount: -POINTS.UNLOCK_COST,
+      type: "unlock",
+      reference_id: restaurantId,
+    });
 
   // 식당 정보 반환
-  const [restaurant] = await db
-    .select()
-    .from(restaurants)
-    .where(eq(restaurants.id, restaurantId));
+  const { data: restaurant } = await supabase
+    .from("restaurants")
+    .select("*")
+    .eq("id", restaurantId)
+    .single();
 
-  const [updatedUser] = await db
-    .select({ points: users.points })
-    .from(users)
-    .where(eq(users.id, userId));
+  const { data: updatedUser } = await supabase
+    .from("users")
+    .select("points")
+    .eq("id", userId)
+    .single();
 
   return NextResponse.json({
     restaurant,
     pointsUsed: POINTS.UNLOCK_COST,
-    remainingPoints: updatedUser.points,
+    remainingPoints: updatedUser?.points,
   });
 }
