@@ -21,7 +21,7 @@ const SOURCE_LABEL: Record<string, string> = {
 
 interface MyPageData {
   user: { id: string; name: string; email: string; points: number; createdAt: string };
-  stats: { totalUnlocked: number; totalSpent: number };
+  stats: { totalUnlocked: number; totalSpent: number; totalVisits: number };
   unlockedRestaurants: {
     restaurantId: string;
     unlockedAt: string;
@@ -31,6 +31,15 @@ interface MyPageData {
     source: string;
     totalVisits: number;
   }[];
+  verifiedVisits: {
+    visitId: string;
+    restaurantId: string;
+    pointsEarned: number;
+    createdAt: string;
+    name: string;
+    category: Category;
+    region: string;
+  }[];
   pointHistory: { amount: number; type: string; createdAt: string }[];
 }
 
@@ -38,7 +47,7 @@ export default function MyPage() {
   const router = useRouter();
   const [data, setData] = useState<MyPageData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"unlocked" | "points">("unlocked");
+  const [tab, setTab] = useState<"unlocked" | "visits" | "points">("unlocked");
   const { mode, setMode } = useThemeStore();
   const { logout } = useUserStore();
 
@@ -94,8 +103,8 @@ export default function MyPage() {
             <p className="text-[10px] text-ctp-subtext dark:text-tn-fg-dark">열람한 맛집</p>
           </div>
           <div className="text-center bg-ctp-mantle dark:bg-tn-bg-highlight rounded-xl p-3">
-            <p className="text-lg font-bold text-ctp-text dark:text-tn-fg">{data.stats.totalSpent}P</p>
-            <p className="text-[10px] text-ctp-subtext dark:text-tn-fg-dark">사용한 포인트</p>
+            <p className="text-lg font-bold text-ctp-text dark:text-tn-fg">{data.stats.totalVisits}</p>
+            <p className="text-[10px] text-ctp-subtext dark:text-tn-fg-dark">인증한 식당</p>
           </div>
         </div>
       </div>
@@ -131,12 +140,20 @@ export default function MyPage() {
           🔓 열람 기록 ({data.unlockedRestaurants.length})
         </button>
         <button
+          onClick={() => setTab("visits")}
+          className={`flex-1 py-2 text-xs font-medium rounded-lg transition ${
+            tab === "visits" ? "bg-ctp-base dark:bg-tn-bg-highlight text-ctp-text dark:text-tn-fg-bright shadow-sm" : "text-ctp-subtext dark:text-tn-fg-dark"
+          }`}
+        >
+          📸 인증 ({data.verifiedVisits.length})
+        </button>
+        <button
           onClick={() => setTab("points")}
           className={`flex-1 py-2 text-xs font-medium rounded-lg transition ${
             tab === "points" ? "bg-ctp-base dark:bg-tn-bg-highlight text-ctp-text dark:text-tn-fg-bright shadow-sm" : "text-ctp-subtext dark:text-tn-fg-dark"
           }`}
         >
-          💰 포인트 내역
+          💰 포인트
         </button>
       </div>
 
@@ -173,6 +190,44 @@ export default function MyPage() {
                   <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">
                     {new Date(r.unlockedAt).toLocaleDateString("ko-KR")}
                   </span>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {tab === "visits" && (
+          <div className="flex flex-col gap-2">
+            {data.verifiedVisits.length === 0 ? (
+              <div className="text-center py-12">
+                <span className="text-3xl mb-2 block">📸</span>
+                <p className="text-sm text-ctp-overlay dark:text-tn-fg-dark">아직 인증한 식당이 없어요</p>
+                <button
+                  onClick={() => router.push("/receipt")}
+                  className="mt-3 px-4 py-2 text-xs font-bold text-white bg-tn-blue rounded-lg"
+                >
+                  영수증 인증하기
+                </button>
+              </div>
+            ) : (
+              data.verifiedVisits.map((v) => (
+                <div key={v.visitId} className="bg-ctp-base dark:bg-tn-bg-card p-3 rounded-xl flex items-center justify-between">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-ctp-text dark:text-tn-blue truncate">{v.name}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="text-[10px] text-ctp-overlay dark:text-tn-fg-dark">
+                        {v.category ? CATEGORY_LABELS[v.category] : "음식점"}
+                      </span>
+                      <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
+                      <span className="text-[10px] text-ctp-overlay dark:text-tn-fg-dark">{v.region}</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs font-bold text-green-500">+{v.pointsEarned}P</span>
+                    <p className="text-[10px] text-ctp-overlay dark:text-tn-fg-dark">
+                      {new Date(v.createdAt).toLocaleDateString("ko-KR")}
+                    </p>
+                  </div>
                 </div>
               ))
             )}

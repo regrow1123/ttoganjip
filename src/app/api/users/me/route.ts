@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/index";
-import { users, unlocks, restaurants, restaurantStats, pointTransactions } from "@/db/schema";
+import { users, unlocks, restaurants, restaurantStats, pointTransactions, visits } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
@@ -48,14 +48,33 @@ export async function GET(req: NextRequest) {
     .orderBy(desc(pointTransactions.createdAt))
     .limit(20);
 
+  // 인증한 식당 목록
+  const verifiedVisits = await db
+    .select({
+      visitId: visits.id,
+      restaurantId: visits.restaurantId,
+      pointsEarned: visits.pointsEarned,
+      createdAt: visits.createdAt,
+      name: restaurants.name,
+      category: restaurants.category,
+      region: restaurants.region,
+    })
+    .from(visits)
+    .innerJoin(restaurants, eq(visits.restaurantId, restaurants.id))
+    .where(eq(visits.userId, userId))
+    .orderBy(desc(visits.createdAt))
+    .limit(50);
+
   // 통계
   const totalUnlocked = unlockedRestaurants.length;
   const totalSpent = unlockedRestaurants.length * 5;
+  const totalVisits = verifiedVisits.length;
 
   return NextResponse.json({
     user,
-    stats: { totalUnlocked, totalSpent },
+    stats: { totalUnlocked, totalSpent, totalVisits },
     unlockedRestaurants,
+    verifiedVisits,
     pointHistory,
   });
 }
