@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
         if (kakaoCandidates.length >= 3) break;
         try {
           const res = await fetch(
-            `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(name)}&category_group_code=FD6,CE7&size=3`,
+            `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(name)}&size=5`,
             { headers: { Authorization: `KakaoAK ${kakaoKey}` } }
           );
           if (res.ok) {
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
                 placeId: d.id,
                 name: d.place_name,
                 address: d.road_address_name || d.address_name,
-                category: d.category_group_code === "CE7" ? "cafe" : "korean",
+                category: d.category_group_code === "CE7" ? "cafe" : d.category_group_code === "FD6" ? "korean" : "other",
                 lat: parseFloat(d.y),
                 lng: parseFloat(d.x),
               }));
