@@ -151,7 +151,7 @@ export default function MyPage() {
               data.unlockedRestaurants.map((r) => (
                 <div key={r.restaurantId} className="bg-white dark:bg-gray-800 p-3 rounded-xl flex items-center gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-gray-900 dark:text-indigo-300 truncate">{r.name}</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-indigo-400 truncate">{r.name}</p>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       {r.source && (
                         <span className="text-[10px] text-gray-400 dark:text-gray-400">
