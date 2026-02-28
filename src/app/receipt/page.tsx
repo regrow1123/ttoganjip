@@ -23,6 +23,8 @@ interface VerifyResult {
   totalPoints?: number;
   error?: string;
   lines?: string[];
+  searchedNames?: string[];
+  kakaoKeyExists?: boolean;
   kakaoCandidates?: KakaoCandidate[];
   needsRegistration?: boolean;
 }
@@ -293,6 +295,14 @@ export default function ReceiptPage() {
                 <summary className="text-xs text-ctp-overlay dark:text-tn-fg-dark cursor-pointer">OCR 인식 결과 보기</summary>
                 <div className="mt-2 bg-ctp-mantle dark:bg-tn-bg-highlight rounded-lg p-3 text-xs text-ctp-subtext dark:text-tn-fg-dark max-h-32 overflow-y-auto">
                   {result.lines.map((l, i) => <div key={i}>{l}</div>)}
+                  {result.searchedNames && (
+                    <div className="mt-2 pt-2 border-t border-ctp-surface0 dark:border-tn-border">
+                      <div className="font-bold">검색 키워드:</div>
+                      {result.searchedNames.map((n, i) => <div key={i}>→ {n}</div>)}
+                      <div className="mt-1">카카오 키: {result.kakaoKeyExists ? "✅" : "❌"}</div>
+                      <div>후보 수: {result.kakaoCandidates?.length ?? 0}</div>
+                    </div>
+                  )}
                 </div>
               </details>
             )}

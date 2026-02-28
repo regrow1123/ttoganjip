@@ -98,9 +98,20 @@ export async function POST(req: NextRequest) {
       kakaoCandidates = kakaoCandidates.slice(0, 5);
     }
 
+    // 검색 키워드 후보 재추출 (응답에 포함)
+    const debugNames: string[] = [];
+    for (const line of lines.slice(0, 3)) {
+      const parenMatch = line.match(/[（(]([^)）]+)[)）]/);
+      if (parenMatch) debugNames.push(parenMatch[1].trim());
+      const cleaned = line.replace(/[()（）㈜㈱\-주식회사(주)]/g, "").trim();
+      if (cleaned.length >= 2 && cleaned.length <= 20) debugNames.push(cleaned);
+    }
+
     return NextResponse.json({
       error: "매칭되는 식당을 찾을 수 없습니다",
       lines: lines.slice(0, 10),
+      searchedNames: [...new Set(debugNames)],
+      kakaoKeyExists: !!kakaoKey,
       kakaoCandidates,
       needsRegistration: kakaoCandidates.length > 0,
     }, { status: 404 });
