@@ -2,6 +2,25 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Tokyo Night Theme */
+@theme {
+  --color-tn-bg: #1a1b27;
+  --color-tn-bg-alt: #24283b;
+  --color-tn-bg-highlight: #292e42;
+  --color-tn-bg-card: #1f2335;
+  --color-tn-border: #3b4261;
+  --color-tn-fg: #a9b1d6;
+  --color-tn-fg-dark: #565f89;
+  --color-tn-fg-bright: #c0caf5;
+  --color-tn-blue: #7aa2f7;
+  --color-tn-cyan: #7dcfff;
+  --color-tn-green: #9ece6a;
+  --color-tn-orange: #ff9e64;
+  --color-tn-red: #f7768e;
+  --color-tn-magenta: #bb9af7;
+  --color-tn-yellow: #e0af68;
+}
+
 @keyframes slide-up {
   from { transform: translateY(100%); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }

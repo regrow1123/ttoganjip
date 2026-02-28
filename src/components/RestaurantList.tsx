@@ -10,17 +10,17 @@ import RestaurantDetail from "./RestaurantDetail";
 
 function LockedCard({ restaurant, onUnlock }: { restaurant: LockedRestaurant; onUnlock: (id: string) => void }) {
   return (
-    <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl hover:border-orange-200 dark:hover:border-orange-800 transition">
-      <div className="flex-shrink-0 w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+    <div className="flex items-center gap-3 p-3 bg-white dark:bg-tn-bg-card border border-gray-100 dark:border-tn-border rounded-xl hover:border-orange-200 dark:hover:border-tn-orange transition">
+      <div className="flex-shrink-0 w-10 h-10 bg-gray-100 dark:bg-tn-bg-highlight rounded-lg flex items-center justify-center">
         <span className="text-lg">🔒</span>
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+          <span className="text-xs font-medium text-gray-500 dark:text-tn-fg-dark">
             {restaurant.category ? CATEGORY_LABELS[restaurant.category] : "음식점"}
           </span>
-          <span className="text-[10px] text-gray-300 dark:text-gray-600">•</span>
-          <span className="text-xs text-gray-400 dark:text-gray-500">{restaurant.areaHint}</span>
+          <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
+          <span className="text-xs text-gray-400 dark:text-tn-fg-dark">{restaurant.areaHint}</span>
         </div>
         <div className="flex items-center gap-1 mt-0.5">
           <span className="text-xs font-semibold text-orange-500">🔥 {restaurant.revisitScore}회 재방문</span>
@@ -44,21 +44,21 @@ const SOURCE_BADGE: Record<string, string> = {
 
 function UnlockedCard({ restaurant, onClick }: { restaurant: UnlockedRestaurant; onClick: () => void }) {
   return (
-    <div onClick={onClick} className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800/30 rounded-xl cursor-pointer hover:border-orange-200 dark:hover:border-orange-700 transition">
-      <div className="flex-shrink-0 w-10 h-10 bg-orange-100 dark:bg-orange-800/30 rounded-lg flex items-center justify-center">
+    <div onClick={onClick} className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-tn-orange/20 rounded-xl cursor-pointer hover:border-orange-200 dark:hover:border-orange-700 transition">
+      <div className="flex-shrink-0 w-10 h-10 bg-orange-100 dark:bg-tn-orange/10 rounded-lg flex items-center justify-center">
         <span className="text-lg">🍽️</span>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{restaurant.name}</p>
-        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{restaurant.address}</p>
+        <p className="text-sm font-bold text-gray-900 dark:text-tn-fg-bright truncate">{restaurant.name}</p>
+        <p className="text-xs text-gray-500 dark:text-tn-fg-dark truncate">{restaurant.address}</p>
         <div className="flex items-center gap-1.5 mt-0.5">
           {restaurant.source && (
-            <span className="text-[10px] bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded">
+            <span className="text-[10px] bg-white dark:bg-tn-bg-highlight text-gray-500 dark:text-tn-fg-dark px-1.5 py-0.5 rounded">
               {SOURCE_BADGE[restaurant.source] || restaurant.source}
             </span>
           )}
           {restaurant.category && (
-            <span className="text-[10px] bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded">
+            <span className="text-[10px] bg-white dark:bg-tn-bg-highlight text-gray-500 dark:text-tn-fg-dark px-1.5 py-0.5 rounded">
               {CATEGORY_LABELS[restaurant.category]}
             </span>
           )}
@@ -107,7 +107,7 @@ export default function RestaurantList() {
     return (
       <div className="flex items-center justify-center py-8">
         <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm text-gray-400 dark:text-gray-500 ml-2">로딩 중...</span>
+        <span className="text-sm text-gray-400 dark:text-tn-fg-dark ml-2">로딩 중...</span>
       </div>
     );
   }
@@ -116,7 +116,7 @@ export default function RestaurantList() {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4">
         <span className="text-3xl mb-2">🗺️</span>
-        <p className="text-sm text-gray-400 dark:text-gray-500 text-center">
+        <p className="text-sm text-gray-400 dark:text-tn-fg-dark text-center">
           이 지역에 등록된 재방문 맛집이 없어요.<br />지도를 이동해보세요!
         </p>
       </div>
@@ -126,7 +126,7 @@ export default function RestaurantList() {
   return (
     <div className="flex flex-col gap-2 px-4 pb-4">
       <div className="flex items-center justify-between py-1">
-        <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500">재방문 맛집 {restaurants.length}곳</h2>
+        <h2 className="text-xs font-semibold text-gray-400 dark:text-tn-fg-dark">재방문 맛집 {restaurants.length}곳</h2>
       </div>
       {restaurants.map((r) =>
         r.locked ? (

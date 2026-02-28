@@ -28,7 +28,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      <body className="antialiased bg-white dark:bg-tn-bg text-gray-900 dark:text-tn-fg">
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

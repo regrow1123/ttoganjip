@@ -81,7 +81,7 @@ export default function BottomSheet({ children }: BottomSheetProps) {
   return (
     <div
       ref={sheetRef}
-      className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)] z-50 flex flex-col"
+      className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-tn-bg rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.6)] z-50 flex flex-col"
       style={{
         height: `${currentHeight}px`,
         transition: isDragging ? "none" : "height 0.3s ease-out",

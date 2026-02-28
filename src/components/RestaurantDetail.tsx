@@ -51,15 +51,15 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
       className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white dark:bg-gray-800 w-full sm:w-[420px] sm:max-h-[80vh] max-h-[75vh] sm:rounded-2xl rounded-t-2xl overflow-hidden animate-slide-up flex flex-col">
+      <div className="bg-white dark:bg-tn-bg-card w-full sm:w-[420px] sm:max-h-[80vh] max-h-[75vh] sm:rounded-2xl rounded-t-2xl overflow-hidden animate-slide-up flex flex-col">
         {/* 헤더 */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700">
-          <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">
+        <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-tn-border">
+          <h2 className="text-base font-bold text-gray-900 dark:text-tn-fg-bright">
             {loading ? "로딩 중..." : data?.locked ? "🔒 잠긴 맛집" : data?.name || "맛집 정보"}
           </h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100"
+            className="w-8 h-8 flex items-center justify-center text-gray-400 dark:text-tn-fg-dark hover:text-gray-600 dark:hover:text-tn-fg rounded-full hover:bg-gray-100"
           >
             ✕
           </button>
@@ -75,16 +75,16 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
 
           {!loading && data?.locked && (
             <div className="flex flex-col items-center gap-4 py-8">
-              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center">
+              <div className="w-16 h-16 bg-gray-100 dark:bg-tn-bg-highlight rounded-2xl flex items-center justify-center">
                 <span className="text-3xl">🔒</span>
               </div>
               <div className="text-center">
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                <p className="text-sm text-gray-500 dark:text-tn-fg-dark mb-1">
                   {data.category ? CATEGORY_LABELS[data.category] : "음식점"} · {data.region || "서울"}
                 </p>
                 <p className="text-lg font-bold text-orange-500">🔥 {data.totalVisits}회 재방문</p>
               </div>
-              <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
+              <p className="text-xs text-gray-400 dark:text-tn-fg-dark text-center">
                 잠금을 해제하면 상호명, 주소, 상세 정보를 확인할 수 있어요
               </p>
             </div>
@@ -101,12 +101,12 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
                     </span>
                   )}
                   {data.category && (
-                    <span className="text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] bg-gray-100 dark:bg-tn-bg-highlight text-gray-500 dark:text-tn-fg-dark px-2 py-0.5 rounded-full">
                       {CATEGORY_LABELS[data.category]}
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-300">{data.address}</p>
+                <p className="text-sm text-gray-600 dark:text-tn-fg">{data.address}</p>
                 <p className="text-base font-bold text-orange-500">🔥 {data.totalVisits}회 재방문</p>
               </div>
 
@@ -125,28 +125,28 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
               {/* 국회의원 업무추진비 내역 */}
               {data.expenses && data.expenses.length > 0 && (
                 <div className="mt-2">
-                  <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-2">
+                  <h3 className="text-xs font-semibold text-gray-400 dark:text-tn-fg-dark mb-2">
                     📋 업무추진비 사용 내역 ({data.expenses.length}건)
                   </h3>
                   <div className="flex flex-col gap-2">
                     {data.expenses.map((e, i) => (
                       <div
                         key={i}
-                        className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-xs"
+                        className="bg-gray-50 dark:bg-tn-bg-highlight rounded-lg p-3 text-xs"
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <span className="font-medium text-gray-700 dark:text-gray-300">
+                          <span className="font-medium text-gray-700 dark:text-tn-fg">
                             {e.memberName} ({e.party})
                           </span>
-                          <span className="text-gray-400 dark:text-gray-500">{e.date}</span>
+                          <span className="text-gray-400 dark:text-tn-fg-dark">{e.date}</span>
                         </div>
                         {e.amount && (
-                          <span className="text-gray-500 dark:text-gray-400 dark:text-gray-500">
+                          <span className="text-gray-500 dark:text-tn-fg-dark dark:text-tn-fg-dark">
                             {e.amount.toLocaleString()}원
                           </span>
                         )}
                         {e.purpose && (
-                          <p className="text-gray-400 dark:text-gray-500 mt-1">{e.purpose}</p>
+                          <p className="text-gray-400 dark:text-tn-fg-dark mt-1">{e.purpose}</p>
                         )}
                       </div>
                     ))}
