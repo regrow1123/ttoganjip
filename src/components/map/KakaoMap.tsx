@@ -53,28 +53,29 @@ export default function KakaoMap() {
             cursor: pointer;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
           ">
-            <div style="
-              background: ${
-                r.grade === 'jjin' ? '#cba6f7' :
-                r.grade === 'dangol' ? '#89b4fa' :
-                '#94e2d5'
-              };
-              color: white;
-              width: 30px;
-              height: 30px;
-              border-radius: 50% 50% 50% 0;
-              transform: rotate(-45deg);
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              border: 2px solid white;
-            ">
-              <span style="
-                transform: rotate(45deg);
-                font-size: 12px;
-                font-weight: 700;
-                line-height: 1;
-              ">${num}</span>
+            <div style="position: relative;">
+              ${r.grade === 'jjin' ? '<span style="position:absolute;top:-8px;right:-8px;font-size:12px;z-index:1;">🥇</span>' :
+                r.grade === 'dangol' ? '<span style="position:absolute;top:-8px;right:-8px;font-size:12px;z-index:1;">🥈</span>' :
+                r.grade === 'ttoganjip' ? '<span style="position:absolute;top:-8px;right:-8px;font-size:12px;z-index:1;">🥉</span>' : ''}
+              <div style="
+                background: #89b4fa;
+                color: white;
+                width: 30px;
+                height: 30px;
+                border-radius: 50% 50% 50% 0;
+                transform: rotate(-45deg);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 2px solid white;
+              ">
+                <span style="
+                  transform: rotate(45deg);
+                  font-size: 12px;
+                  font-weight: 700;
+                  line-height: 1;
+                ">${num}</span>
+              </div>
             </div>
           </div>
         `;
