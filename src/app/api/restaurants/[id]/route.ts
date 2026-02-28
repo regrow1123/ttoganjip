@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/index";
 import { restaurants, restaurantStats, assemblyExpenses, assemblyMembers, unlocks } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 
 export async function GET(
   req: NextRequest,
@@ -59,7 +59,7 @@ export async function GET(
       .from(assemblyExpenses)
       .innerJoin(assemblyMembers, eq(assemblyExpenses.memberId, assemblyMembers.id))
       .where(eq(assemblyExpenses.restaurantId, id))
-      .orderBy(assemblyExpenses.expenseDate);
+      .orderBy(sql`${assemblyExpenses.expenseDate} DESC`);
   }
 
   if (!isUnlocked) {
