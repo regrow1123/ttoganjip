@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
   const result = rows.map((r) => {
     const isUnlocked = unlockedIds.has(r.id);
 
-    const grade = getGrade(r.totalVisits);
+    const grade = r.source === "user" ? getGrade(r.totalVisits) : "none" as const;
 
     if (isUnlocked) {
       return {
