@@ -61,13 +61,26 @@ export async function POST(req: NextRequest) {
     if (kakaoKey) {
       // 검색 키워드 후보 추출
       const searchNames: string[] = [];
-      for (const line of lines.slice(0, 3)) {
-        // 괄호 안 텍스트 추출 (실제 상호명인 경우가 많음)
-        const parenMatch = line.match(/[（(]([^)）]+)[)）]/);
-        if (parenMatch) searchNames.push(parenMatch[1].trim());
-        // 줄 전체 (사업자명 등 제거)
-        const cleaned = line.replace(/[()（）㈜㈱\-주식회사(주)]/g, "").trim();
-        if (cleaned.length >= 2 && cleaned.length <= 20) searchNames.push(cleaned);
+      for (const line of lines.slice(0, 5)) {
+        // 모든 괄호 안 텍스트 추출 (실제 상호명인 경우가 많음)
+        const parenMatches = line.matchAll(/[（(]([^)）]{2,})[)）]/g);
+        for (const m of parenMatches) {
+          const inner = m[1].trim();
+          // (주), 사업자번호 등 제외
+          if (inner.length >= 2 && !/^주$|^\d|사업|번호/.test(inner)) {
+            searchNames.push(inner);
+          }
+        }
+        // 법인명 정리: (주), ㈜, 주식회사, 괄호 내용 제거 후 상호명만
+        let cleaned = line
+          .replace(/㈜|㈱|\(주\)|주식회사/g, "")
+          .replace(/[（(][^)）]*[)）]/g, "")  // 괄호+내용 제거
+          .replace(/[—\-–:：]/g, " ")
+          .replace(/사업자?.?번호.*/i, "")
+          .trim();
+        if (cleaned.length >= 2 && cleaned.length <= 20) {
+          searchNames.push(cleaned);
+        }
       }
 
       // 중복 제거 후 순서대로 검색
@@ -100,11 +113,11 @@ export async function POST(req: NextRequest) {
 
     // 검색 키워드 후보 재추출 (응답에 포함)
     const debugNames: string[] = [];
-    for (const line of lines.slice(0, 3)) {
-      const parenMatch = line.match(/[（(]([^)）]+)[)）]/);
-      if (parenMatch) debugNames.push(parenMatch[1].trim());
-      const cleaned = line.replace(/[()（）㈜㈱\-주식회사(주)]/g, "").trim();
-      if (cleaned.length >= 2 && cleaned.length <= 20) debugNames.push(cleaned);
+    for (const line of lines.slice(0, 5)) {
+      const pm = line.matchAll(/[（(]([^)）]{2,})[)）]/g);
+      for (const m of pm) { if (!/^주$|^\d|사업|번호/.test(m[1].trim())) debugNames.push(m[1].trim()); }
+      let c = line.replace(/㈜|㈱|\(주\)|주식회사/g,"").replace(/[（(][^)）]*[)）]/g,"").replace(/[—\-–:：]/g," ").replace(/사업자?.?번호.*/i,"").trim();
+      if (c.length >= 2 && c.length <= 20) debugNames.push(c);
     }
 
     return NextResponse.json({
