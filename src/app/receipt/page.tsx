@@ -32,19 +32,21 @@ export default function ReceiptPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [ocrProgress, setOcrProgress] = useState(0);
   const [result, setResult] = useState<VerifyResult | null>(null);
   const [lastOcrText, setLastOcrText] = useState("");
 
   const handleFile = (file: File) => {
+    setSelectedFile(file);
     setPreview(URL.createObjectURL(file));
     setStatus("idle");
     setResult(null);
   };
 
   const handleVerify = async () => {
-    const file = fileRef.current?.files?.[0];
+    const file = selectedFile;
     if (!file) return;
 
     // 1) 브라우저 OCR
@@ -135,6 +137,7 @@ export default function ReceiptPage() {
 
   const reset = () => {
     setPreview(null);
+    setSelectedFile(null);
     setStatus("idle");
     setResult(null);
     setOcrProgress(0);
