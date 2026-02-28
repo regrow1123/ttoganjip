@@ -1,17 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { restaurants, restaurantStats } from "@/db/schema";
-import { ilike, eq } from "drizzle-orm";
+import { ilike, eq, and, gte, lte } from "drizzle-orm";
 
 const KAKAO_REST_KEY = process.env.KAKAO_REST_API_KEY!;
 
 export async function GET(req: NextRequest) {
   const query = req.nextUrl.searchParams.get("q");
   if (!query || query.length < 2) {
-    return NextResponse.json({ results: [] });
+    return NextResponse.json({ db: [], kakao: [] });
   }
 
-  // 1) DB에서 매칭되는 식당 검색
+  const swLat = req.nextUrl.searchParams.get("swLat");
+  const swLng = req.nextUrl.searchParams.get("swLng");
+  const neLat = req.nextUrl.searchParams.get("neLat");
+  const neLng = req.nextUrl.searchParams.get("neLng");
+  const hasBounds = swLat && swLng && neLat && neLng;
+
+  // 1) DB에서 매칭 (뷰포트 내)
+  const conditions = [ilike(restaurants.name, `%${query}%`)];
+  if (hasBounds) {
+    conditions.push(gte(restaurants.lat, parseFloat(swLat)));
+    conditions.push(lte(restaurants.lat, parseFloat(neLat)));
+    conditions.push(gte(restaurants.lng, parseFloat(swLng)));
+    conditions.push(lte(restaurants.lng, parseFloat(neLng)));
+  }
+
   const dbResults = await db
     .select({
       id: restaurants.id,
@@ -24,15 +38,19 @@ export async function GET(req: NextRequest) {
     })
     .from(restaurants)
     .leftJoin(restaurantStats, eq(restaurants.id, restaurantStats.restaurantId))
-    .where(ilike(restaurants.name, `%${query}%`))
+    .where(and(...conditions))
     .limit(5);
 
   const dbPlaceIds = new Set(dbResults.map((r) => r.placeId).filter(Boolean));
 
-  // 2) 카카오 키워드 검색 (음식점 카테고리)
+  // 2) 카카오 키워드 검색 (뷰포트 rect 제한)
   const url = new URL("https://dapi.kakao.com/v2/local/search/keyword.json");
   url.searchParams.set("query", query);
   url.searchParams.set("size", "10");
+  if (hasBounds) {
+    // rect: x1,y1,x2,y2 (서쪽경도,남쪽위도,동쪽경도,북쪽위도)
+    url.searchParams.set("rect", `${swLng},${swLat},${neLng},${neLat}`);
+  }
 
   const res = await fetch(url.toString(), {
     headers: { Authorization: `KakaoAK ${KAKAO_REST_KEY}` },
@@ -40,12 +58,14 @@ export async function GET(req: NextRequest) {
 
   if (!res.ok) {
     console.error("Kakao API error:", res.status, await res.text());
-    return NextResponse.json({ db: dbResults.length ? dbResults.map((r) => ({ ...r, inDb: true })) : [], kakao: [] });
+    return NextResponse.json({
+      db: dbResults.map((r) => ({ ...r, totalVisits: r.totalVisits || 0, placeUrl: r.placeId ? `https://place.map.kakao.com/${r.placeId}` : null, inDb: true })),
+      kakao: [],
+    });
   }
 
   const data = await res.json();
 
-  // DB 결과 (재방문 데이터 있음)
   const dbMapped = dbResults.map((r) => ({
     id: r.id,
     name: r.name,
@@ -57,7 +77,6 @@ export async function GET(req: NextRequest) {
     inDb: true,
   }));
 
-  // 카카오 결과 (DB에 없는 것만)
   const kakaoMapped = data.documents
     .filter((d: any) => !dbPlaceIds.has(d.id))
     .map((d: any) => ({

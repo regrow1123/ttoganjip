@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRestaurantStore } from "@/lib/store";
+import { useRestaurantStore, useMapStore } from "@/lib/store";
 
 interface DbResult {
   id: string;
@@ -31,6 +31,7 @@ const SOURCE_LABEL: Record<string, string> = {
 
 export default function SearchBar() {
   const { searchQuery, setSearchQuery } = useRestaurantStore();
+  const { bounds } = useMapStore();
   const [dbResults, setDbResults] = useState<DbResult[]>([]);
   const [kakaoResults, setKakaoResults] = useState<KakaoResult[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -63,7 +64,11 @@ export default function SearchBar() {
     setIsSearching(true);
     timerRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
+        let url = `/api/search?q=${encodeURIComponent(searchQuery)}`;
+        if (bounds) {
+          url += `&swLat=${bounds.sw.lat}&swLng=${bounds.sw.lng}&neLat=${bounds.ne.lat}&neLng=${bounds.ne.lng}`;
+        }
+        const res = await fetch(url);
         const data = await res.json();
         setDbResults(data.db || []);
         setKakaoResults(data.kakao || []);
