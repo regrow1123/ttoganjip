@@ -14,19 +14,19 @@ function LockedCard({ restaurant, onUnlock }: { restaurant: LockedRestaurant; on
       onClick={() => onUnlock(restaurant.id)}
       className="flex items-center gap-3 p-3 bg-white dark:bg-tn-bg-card border border-gray-100 dark:border-tn-border rounded-xl hover:border-orange-200 dark:hover:border-tn-orange transition cursor-pointer"
     >
-      <div className="flex-shrink-0 w-10 h-10 bg-gray-100 dark:bg-tn-bg-highlight rounded-lg flex items-center justify-center">
-        <span className="text-lg">🔒</span>
+      <div className="flex-shrink-0 w-7 h-7 bg-gray-300 dark:bg-tn-fg-dark rounded-full flex items-center justify-center">
+        <span className="text-[10px]">🔒</span>
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs font-medium text-gray-500 dark:text-tn-fg-dark">
+        <p className="text-sm font-bold text-gray-400 dark:text-tn-fg-dark truncate">잠긴 맛집</p>
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <span className="text-[10px] text-gray-500 dark:text-tn-fg-dark">
             {restaurant.category ? CATEGORY_LABELS[restaurant.category] : "음식점"}
           </span>
           <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
-          <span className="text-xs text-gray-400 dark:text-tn-fg-dark">{restaurant.areaHint}</span>
-        </div>
-        <div className="flex items-center gap-1 mt-0.5">
-          <span className="text-xs font-semibold text-orange-500">🔥 {restaurant.revisitScore}회 재방문</span>
+          <span className="text-[10px] text-gray-400 dark:text-tn-fg-dark">{restaurant.areaHint}</span>
+          <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
+          <span className="text-[10px] font-semibold text-orange-500">🔥 {restaurant.revisitScore}회</span>
         </div>
       </div>
       <span className="flex-shrink-0 text-[10px] text-orange-500 font-medium">5P 열람</span>
@@ -42,26 +42,26 @@ const SOURCE_BADGE: Record<string, string> = {
 
 function UnlockedCard({ restaurant, onClick, index }: { restaurant: UnlockedRestaurant; onClick: () => void; index: number }) {
   return (
-    <div onClick={onClick} className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-tn-orange/20 rounded-xl cursor-pointer hover:border-orange-200 dark:hover:border-orange-700 transition">
+    <div onClick={onClick} className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-tn-orange/10 border border-orange-100 dark:border-tn-orange/20 rounded-xl cursor-pointer hover:border-orange-200 dark:hover:border-orange-700 transition">
       <div className="flex-shrink-0 w-7 h-7 bg-[#FF6B35] rounded-full flex items-center justify-center">
         <span className="text-xs font-bold text-white">{index}</span>
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-bold text-gray-900 dark:text-tn-fg-bright truncate">{restaurant.name}</p>
-        <p className="text-xs text-gray-500 dark:text-tn-fg-dark truncate">{restaurant.address}</p>
         <div className="flex items-center gap-1.5 mt-0.5">
           {restaurant.source && (
-            <span className="text-[10px] bg-white dark:bg-tn-bg-highlight text-gray-500 dark:text-tn-fg-dark px-1.5 py-0.5 rounded">
+            <span className="text-[10px] text-gray-500 dark:text-tn-fg-dark">
               {SOURCE_BADGE[restaurant.source] || restaurant.source}
             </span>
           )}
-          {restaurant.category && (
-            <span className="text-[10px] bg-white dark:bg-tn-bg-highlight text-gray-500 dark:text-tn-fg-dark px-1.5 py-0.5 rounded">
-              {CATEGORY_LABELS[restaurant.category]}
-            </span>
-          )}
-          <span className="text-xs font-semibold text-orange-500">🔥 {restaurant.revisitScore}회</span>
+          <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
+          <span className="text-[10px] text-gray-500 dark:text-tn-fg-dark">
+            {restaurant.category ? CATEGORY_LABELS[restaurant.category] : "음식점"}
+          </span>
+          <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
+          <span className="text-[10px] font-semibold text-orange-500">🔥 {restaurant.revisitScore}회</span>
         </div>
+        <p className="text-[10px] text-gray-400 dark:text-tn-fg-dark truncate mt-0.5">{restaurant.address}</p>
       </div>
     </div>
   );
@@ -199,14 +199,24 @@ export default function RestaurantList() {
                   <p className={`text-sm font-bold truncate ${
                     r.locked ? "text-gray-400 dark:text-tn-fg-dark" : "text-gray-900 dark:text-tn-fg-bright"
                   }`}>
-                    {r.locked ? "🔒 잠긴 맛집" : `${SOURCE_LABEL[r.source] || ""} ${r.name}`}
+                    {r.locked ? "잠긴 맛집" : r.name}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-tn-fg-dark truncate">{r.address}</p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    {!r.locked && r.source && (
+                      <span className="text-[10px] text-gray-500 dark:text-tn-fg-dark">
+                        {SOURCE_LABEL[r.source] || r.source}
+                      </span>
+                    )}
+                    {!r.locked && r.source && <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>}
+                    <span className="text-[10px] text-gray-500 dark:text-tn-fg-dark">
+                      {r.category || "음식점"}
+                    </span>
+                    <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
+                    <span className="text-[10px] font-semibold text-orange-500">🔥 {r.totalVisits}회</span>
+                  </div>
+                  <p className="text-[10px] text-gray-400 dark:text-tn-fg-dark truncate mt-0.5">{r.address}</p>
                 </div>
-                <div className="flex flex-col items-end flex-shrink-0">
-                  <span className="text-xs font-semibold text-orange-500">🔥 {r.totalVisits}회</span>
-                  {r.locked && <span className="text-[10px] text-orange-500 mt-0.5">5P 열람</span>}
-                </div>
+                {r.locked && <span className="flex-shrink-0 text-[10px] text-orange-500 font-medium">5P 열람</span>}
               </div>
             ))}
           </>
