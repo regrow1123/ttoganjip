@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
       source: restaurants.source,
       totalVisits: restaurantStats.totalVisits,
       maxRevisits: restaurantStats.maxRevisits,
+      publicVisits: restaurantStats.publicVisits,
       userVisits: restaurantStats.userVisits,
     })
     .from(restaurants)
@@ -89,6 +90,8 @@ export async function GET(req: NextRequest) {
         category: r.category,
         location: { lat: r.lat, lng: r.lng },
         revisitScore: r.totalVisits,
+        publicVisits: r.publicVisits ?? 0,
+        userVisits: r.userVisits ?? 0,
         source: r.source,
         grade,
         locked: false,
@@ -99,6 +102,8 @@ export async function GET(req: NextRequest) {
       id: r.id,
       category: r.category,
       revisitScore: r.totalVisits,
+      publicVisits: r.publicVisits ?? 0,
+      userVisits: r.userVisits ?? 0,
       areaHint: r.region || "서울",
       source: r.source,
       grade,

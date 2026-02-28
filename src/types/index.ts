@@ -44,6 +44,8 @@ export interface LockedRestaurant {
   id: string;
   category: Category | null;
   revisitScore: number;
+  publicVisits?: number;
+  userVisits?: number;
   areaHint: string;
   source?: string;
   grade?: Grade;
@@ -58,6 +60,8 @@ export interface UnlockedRestaurant {
   category: Category | null;
   location: { lat: number; lng: number };
   revisitScore: number;
+  publicVisits?: number;
+  userVisits?: number;
   source?: string;
   grade?: Grade;
   locked: false;
