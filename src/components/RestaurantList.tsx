@@ -180,8 +180,8 @@ export default function RestaurantList() {
                     // 잠금 해제 모달
                     if (!isLoggedIn) { login(); return; }
                     setUnlockTarget({ id: r.id, category: r.category as any, areaHint: r.address, revisitScore: r.totalVisits, locked: true } as LockedRestaurant);
-                  } else if (r.placeUrl) {
-                    window.open(r.placeUrl, "_blank");
+                  } else {
+                    setDetailId(r.id);
                   }
                 }}
                 className={`flex items-center gap-3 p-3 rounded-xl transition ${
@@ -243,6 +243,7 @@ export default function RestaurantList() {
           </>
         )}
 
+        {detailId && <RestaurantDetail restaurantId={detailId} onClose={() => setDetailId(null)} />}
         {unlockTarget && (
           <UnlockModal restaurant={unlockTarget} userPoints={points} onConfirm={handleConfirmUnlock} onClose={() => setUnlockTarget(null)} />
         )}
