@@ -2,8 +2,9 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Tesseract from "tesseract.js";
 
-type Status = "idle" | "uploading" | "success" | "error";
+type Status = "idle" | "ocr" | "matching" | "success" | "error";
 
 interface VerifyResult {
   success?: boolean;
@@ -11,9 +12,7 @@ interface VerifyResult {
   isFirstVisit?: boolean;
   pointsEarned?: number;
   totalPoints?: number;
-  message?: string;
   error?: string;
-  ocrText?: string;
 }
 
 export default function ReceiptPage() {
@@ -21,6 +20,7 @@ export default function ReceiptPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("idle");
+  const [ocrProgress, setOcrProgress] = useState(0);
   const [result, setResult] = useState<VerifyResult | null>(null);
 
   const handleFile = (file: File) => {
@@ -29,18 +29,43 @@ export default function ReceiptPage() {
     setResult(null);
   };
 
-  const handleUpload = async () => {
+  const handleVerify = async () => {
     const file = fileRef.current?.files?.[0];
     if (!file) return;
 
-    setStatus("uploading");
-    const formData = new FormData();
-    formData.append("receipt", file);
+    // 1) 브라우저 OCR
+    setStatus("ocr");
+    setOcrProgress(0);
 
+    let ocrText = "";
+    try {
+      const result = await Tesseract.recognize(file, "kor+eng", {
+        logger: (m) => {
+          if (m.status === "recognizing text") {
+            setOcrProgress(Math.round((m.progress || 0) * 100));
+          }
+        },
+      });
+      ocrText = result.data.text;
+    } catch {
+      setStatus("error");
+      setResult({ error: "영수증 텍스트 인식에 실패했습니다" });
+      return;
+    }
+
+    if (!ocrText || ocrText.trim().length < 5) {
+      setStatus("error");
+      setResult({ error: "영수증에서 텍스트를 읽을 수 없습니다. 더 선명한 사진을 올려주세요." });
+      return;
+    }
+
+    // 2) 서버 매칭
+    setStatus("matching");
     try {
       const res = await fetch("/api/receipts/verify", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ocrText }),
       });
       const data = await res.json();
 
@@ -57,12 +82,18 @@ export default function ReceiptPage() {
     }
   };
 
+  const reset = () => {
+    setPreview(null);
+    setStatus("idle");
+    setResult(null);
+    setOcrProgress(0);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
   return (
     <div className="min-h-dvh bg-gray-50 dark:bg-tn-bg">
       <header className="bg-white dark:bg-tn-bg border-b border-gray-100 dark:border-tn-border px-4 py-3 flex items-center gap-3">
-        <button onClick={() => router.push("/")} className="text-gray-500 dark:text-tn-fg-dark hover:text-gray-700">
-          ←
-        </button>
+        <button onClick={() => router.push("/")} className="text-gray-500 dark:text-tn-fg-dark hover:text-gray-700">←</button>
         <h1 className="text-base font-bold text-gray-900 dark:text-tn-fg-bright">📸 영수증 인증</h1>
       </header>
 
@@ -72,14 +103,16 @@ export default function ReceiptPage() {
           <h2 className="text-sm font-bold text-orange-600 dark:text-tn-orange mb-1">방문 인증하고 포인트 받기!</h2>
           <p className="text-xs text-gray-500 dark:text-tn-fg-dark leading-relaxed">
             식당 영수증을 촬영하면 자동으로 식당을 인식해요.<br />
-            첫 방문 +10P, 재방문 +20P!
+            첫 방문 <b>+10P</b>, 재방문 <b>+20P</b>!
           </p>
         </div>
 
         {/* 업로드 영역 */}
         <div
-          onClick={() => fileRef.current?.click()}
-          className="bg-white dark:bg-tn-bg-card border-2 border-dashed border-gray-200 dark:border-tn-border rounded-xl p-8 flex flex-col items-center gap-3 cursor-pointer hover:border-orange-300 transition"
+          onClick={() => status === "idle" && fileRef.current?.click()}
+          className={`bg-white dark:bg-tn-bg-card border-2 border-dashed border-gray-200 dark:border-tn-border rounded-xl p-8 flex flex-col items-center gap-3 transition ${
+            status === "idle" ? "cursor-pointer hover:border-orange-300" : ""
+          }`}
         >
           {preview ? (
             <img src={preview} alt="영수증" className="max-h-64 rounded-lg object-contain" />
@@ -104,21 +137,28 @@ export default function ReceiptPage() {
         />
 
         {/* 인증 버튼 */}
-        {preview && status !== "uploading" && (
-          <button
-            onClick={handleUpload}
-            className="w-full py-3 text-sm font-bold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition"
-          >
+        {preview && status === "idle" && (
+          <button onClick={handleVerify} className="w-full py-3 text-sm font-bold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition">
             🔍 영수증 인증하기
           </button>
         )}
 
-        {/* 로딩 */}
-        {status === "uploading" && (
+        {/* OCR 진행 */}
+        {status === "ocr" && (
           <div className="flex flex-col items-center gap-3 py-6">
             <div className="w-8 h-8 border-3 border-orange-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-sm text-gray-500 dark:text-tn-fg-dark">영수증 분석 중...</p>
-            <p className="text-[10px] text-gray-400 dark:text-tn-fg-dark">OCR로 텍스트를 추출하고 있어요</p>
+            <p className="text-sm text-gray-500 dark:text-tn-fg-dark">영수증 텍스트 인식 중... {ocrProgress}%</p>
+            <div className="w-full bg-gray-200 dark:bg-tn-bg-highlight rounded-full h-1.5">
+              <div className="bg-orange-500 h-1.5 rounded-full transition-all" style={{ width: `${ocrProgress}%` }} />
+            </div>
+          </div>
+        )}
+
+        {/* 매칭 중 */}
+        {status === "matching" && (
+          <div className="flex flex-col items-center gap-3 py-6">
+            <div className="w-8 h-8 border-3 border-orange-500 border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm text-gray-500 dark:text-tn-fg-dark">식당 매칭 중...</p>
           </div>
         )}
 
@@ -138,16 +178,10 @@ export default function ReceiptPage() {
             </div>
             <p className="text-xs text-gray-400 dark:text-tn-fg-dark">보유 포인트: {result.totalPoints}P</p>
             <div className="flex gap-2 w-full mt-2">
-              <button
-                onClick={() => { setPreview(null); setStatus("idle"); setResult(null); if (fileRef.current) fileRef.current.value = ""; }}
-                className="flex-1 py-2.5 text-sm font-medium text-gray-600 dark:text-tn-fg bg-gray-100 dark:bg-tn-bg-highlight rounded-xl"
-              >
+              <button onClick={reset} className="flex-1 py-2.5 text-sm font-medium text-gray-600 dark:text-tn-fg bg-gray-100 dark:bg-tn-bg-highlight rounded-xl">
                 추가 인증
               </button>
-              <button
-                onClick={() => router.push("/")}
-                className="flex-1 py-2.5 text-sm font-bold text-white bg-orange-500 rounded-xl"
-              >
+              <button onClick={() => router.push("/")} className="flex-1 py-2.5 text-sm font-bold text-white bg-orange-500 rounded-xl">
                 홈으로
               </button>
             </div>
@@ -162,10 +196,7 @@ export default function ReceiptPage() {
             </div>
             <h3 className="text-base font-bold text-gray-900 dark:text-tn-fg-bright">인증 실패</h3>
             <p className="text-sm text-gray-500 dark:text-tn-fg-dark text-center">{result.error}</p>
-            <button
-              onClick={() => { setPreview(null); setStatus("idle"); setResult(null); if (fileRef.current) fileRef.current.value = ""; }}
-              className="w-full py-2.5 text-sm font-medium text-gray-600 dark:text-tn-fg bg-gray-100 dark:bg-tn-bg-highlight rounded-xl mt-2"
-            >
+            <button onClick={reset} className="w-full py-2.5 text-sm font-medium text-gray-600 dark:text-tn-fg bg-gray-100 dark:bg-tn-bg-highlight rounded-xl mt-2">
               다시 시도
             </button>
           </div>
