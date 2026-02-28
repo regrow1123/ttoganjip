@@ -44,7 +44,7 @@ export default function KakaoMap() {
         // 커스텀 오버레이 (마커 대신)
         const content = document.createElement("div");
         content.innerHTML = `
-          <div style="
+          <div class="map-overlay" style="
             background: #FF6B35;
             color: white;
             padding: 4px 8px;
@@ -168,7 +168,7 @@ export default function KakaoMap() {
   return (
     <div
       ref={mapRef}
-      className="w-full h-full"
+      className="w-full h-full kakao-map-container"
       style={{ minHeight: "100%" }}
     />
   );

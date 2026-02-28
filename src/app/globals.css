@@ -32,6 +32,14 @@
 .animate-slide-up { animation: slide-up 0.25s ease-out; }
 .animate-bounce-once { animation: bounce-once 0.4s ease-out; }
 
+/* 카카오맵 다크모드 필터 */
+.dark .kakao-map-container {
+  filter: invert(0.9) hue-rotate(180deg) brightness(0.85) contrast(1.1);
+}
+.dark .kakao-map-container .map-overlay {
+  filter: invert(0.9) hue-rotate(180deg);
+}
+
 /* 스크롤바 숨기기 (카테고리 필터) */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
