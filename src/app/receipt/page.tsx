@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Tesseract from "tesseract.js";
+import { createWorker } from "tesseract.js";
 
 type Status = "idle" | "ocr" | "matching" | "success" | "error";
 
@@ -40,17 +40,20 @@ export default function ReceiptPage() {
 
     let ocrText = "";
     try {
-      const result = await Tesseract.recognize(file, "kor+eng", {
+      const worker = await createWorker("kor+eng", 1, {
         logger: (m) => {
           if (m.status === "recognizing text") {
             setOcrProgress(Math.round((m.progress || 0) * 100));
           }
         },
       });
+      const result = await worker.recognize(file);
       ocrText = result.data.text;
-    } catch {
+      await worker.terminate();
+    } catch (err: any) {
+      console.error("OCR error:", err);
       setStatus("error");
-      setResult({ error: "영수증 텍스트 인식에 실패했습니다" });
+      setResult({ error: `영수증 텍스트 인식에 실패했습니다: ${err?.message || "알 수 없는 오류"}` });
       return;
     }
 
