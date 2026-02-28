@@ -70,7 +70,7 @@ function UnlockedCard({ restaurant, onClick, index }: { restaurant: UnlockedRest
 }
 
 export default function RestaurantList() {
-  const { restaurants, isLoading, setRestaurants, searchQuery, sortBy, searchDbResults, searchKakaoResults, isSearching } = useRestaurantStore();
+  const { restaurants, isLoading, setRestaurants, searchQuery, sortBy, searchDbResults, searchKakaoResults, isSearching, setSearchResults } = useRestaurantStore();
   const { userId, isLoggedIn, points, setPoints, login } = useUserStore();
   const [unlockTarget, setUnlockTarget] = useState<LockedRestaurant | null>(null);
   const { selectedId, setSelectedId } = useRestaurantStore();
@@ -101,6 +101,18 @@ export default function RestaurantList() {
       )
     );
     if (result.remainingPoints !== undefined) setPoints(result.remainingPoints);
+
+    // 검색 결과도 갱신
+    if (searchDbResults.length > 0) {
+      setSearchResults(
+        searchDbResults.map((sr) =>
+          sr.id === unlockTarget.id
+            ? { ...sr, name: result.restaurant.name, address: result.restaurant.address, locked: false, placeUrl: result.restaurant.placeId ? `https://place.map.kakao.com/${result.restaurant.placeId}` : null }
+            : sr
+        ),
+        searchKakaoResults
+      );
+    }
   };
 
   // 검색 필터링
@@ -165,7 +177,15 @@ export default function RestaurantList() {
             {searchDbResults.map((r, idx) => (
               <div
                 key={r.id}
-                onClick={() => !r.locked && r.placeUrl && window.open(r.placeUrl, "_blank")}
+                onClick={() => {
+                  if (r.locked) {
+                    // 잠금 해제 모달
+                    if (!isLoggedIn) { login(); return; }
+                    setUnlockTarget({ id: r.id, category: r.category as any, areaHint: r.address, revisitScore: r.totalVisits, locked: true } as LockedRestaurant);
+                  } else if (r.placeUrl) {
+                    window.open(r.placeUrl, "_blank");
+                  }
+                }}
                 className={`flex items-center gap-3 p-3 rounded-xl transition ${
                   r.locked
                     ? "bg-white dark:bg-tn-bg-card border border-gray-100 dark:border-tn-border"
