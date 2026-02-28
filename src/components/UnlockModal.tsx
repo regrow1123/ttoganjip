@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CATEGORY_LABELS } from "@/types";
 
 interface UnlockModalProps {
   restaurant: {
@@ -49,7 +50,7 @@ export default function UnlockModal({
               </div>
               <h3 className="text-base font-bold text-gray-900 dark:text-tn-fg-bright">맛집 정보를 확인할까요?</h3>
               <p className="text-sm text-gray-500 dark:text-tn-fg-dark text-center">
-                {restaurant.areaHint} · {restaurant.category || "음식점"} · 🔥 {restaurant.revisitScore}회 재방문
+                {restaurant.areaHint} · {CATEGORY_LABELS[restaurant.category as keyof typeof CATEGORY_LABELS] || restaurant.category || "음식점"} · 🔥 {restaurant.revisitScore}회 재방문
               </p>
             </div>
             <div className="flex items-center justify-between bg-gray-50 dark:bg-tn-bg-highlight rounded-xl p-3 mb-4">
