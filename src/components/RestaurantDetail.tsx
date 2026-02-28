@@ -51,7 +51,7 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
       className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-ctp-base dark:bg-tn-bg-card w-full sm:w-[420px] sm:max-h-[80vh] max-h-[75vh] sm:rounded-2xl rounded-t-2xl overflow-hidden animate-slide-up flex flex-col">
+      <div className="bg-ctp-base dark:bg-tn-bg-card w-full sm:w-[420px] sm:max-h-[80vh] max-h-[70vh] mb-14 sm:mb-0 sm:rounded-2xl rounded-t-2xl overflow-hidden animate-slide-up flex flex-col">
         {/* 헤더 */}
         <div className="flex items-center justify-between p-4 border-b border-ctp-surface0 dark:border-tn-border">
           <h2 className="text-base font-bold text-ctp-text dark:text-tn-fg-bright">
