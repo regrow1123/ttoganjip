@@ -40,3 +40,11 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* 카카오맵 다크모드 — 타일만 필터, 커스텀 오버레이 보정 */
+.dark .kakao-map-container {
+  filter: invert(0.92) hue-rotate(180deg) saturate(0.8) brightness(0.9);
+}
+.dark .kakao-map-container .kakao-pin-overlay {
+  filter: invert(1) hue-rotate(180deg) saturate(1.25) brightness(1.1);
+}

@@ -44,6 +44,7 @@ export default function KakaoMap() {
 
         // 번호 핀 오버레이
         const content = document.createElement("div");
+        content.className = "kakao-pin-overlay";
         content.innerHTML = `
           <div style="
             display: flex;
