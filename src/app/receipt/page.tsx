@@ -4,7 +4,16 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createWorker } from "tesseract.js";
 
-type Status = "idle" | "ocr" | "matching" | "success" | "error";
+type Status = "idle" | "ocr" | "matching" | "success" | "error" | "candidates";
+
+interface KakaoCandidate {
+  placeId: string;
+  name: string;
+  address: string;
+  category: string;
+  lat: number;
+  lng: number;
+}
 
 interface VerifyResult {
   success?: boolean;
@@ -14,6 +23,8 @@ interface VerifyResult {
   totalPoints?: number;
   error?: string;
   lines?: string[];
+  kakaoCandidates?: KakaoCandidate[];
+  needsRegistration?: boolean;
 }
 
 export default function ReceiptPage() {
@@ -24,6 +35,7 @@ export default function ReceiptPage() {
   const [status, setStatus] = useState<Status>("idle");
   const [ocrProgress, setOcrProgress] = useState(0);
   const [result, setResult] = useState<VerifyResult | null>(null);
+  const [lastOcrText, setLastOcrText] = useState("");
 
   const handleFile = (file: File) => {
     setPreview(URL.createObjectURL(file));
@@ -58,6 +70,7 @@ export default function ReceiptPage() {
       });
       const result = await worker.recognize(dataUrl);
       ocrText = result.data.text;
+      setLastOcrText(ocrText);
       await worker.terminate();
     } catch (err: any) {
       console.error("OCR error:", err);
@@ -82,6 +95,31 @@ export default function ReceiptPage() {
       });
       const data = await res.json();
 
+      if (res.ok) {
+        setStatus("success");
+        setResult(data);
+      } else if (data.needsRegistration && data.kakaoCandidates?.length > 0) {
+        setStatus("candidates");
+        setResult(data);
+      } else {
+        setStatus("error");
+        setResult(data);
+      }
+    } catch {
+      setStatus("error");
+      setResult({ error: "네트워크 오류가 발생했습니다" });
+    }
+  };
+
+  const handleSelectCandidate = async (candidate: KakaoCandidate) => {
+    setStatus("matching");
+    try {
+      const res = await fetch("/api/receipts/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...candidate, ocrText: lastOcrText }),
+      });
+      const data = await res.json();
       if (res.ok) {
         setStatus("success");
         setResult(data);
@@ -222,6 +260,30 @@ export default function ReceiptPage() {
         )}
 
         {/* 에러 */}
+        {/* 카카오 후보 선택 */}
+        {status === "candidates" && result?.kakaoCandidates && (
+          <div className="bg-ctp-base dark:bg-tn-bg-card rounded-xl p-5 flex flex-col gap-3 animate-slide-up">
+            <h3 className="text-sm font-bold text-ctp-text dark:text-tn-fg-bright text-center">
+              DB에 없는 식당이에요. 혹시 이 중에 있나요?
+            </h3>
+            <div className="flex flex-col gap-2">
+              {result.kakaoCandidates.map((c) => (
+                <button
+                  key={c.placeId}
+                  onClick={() => handleSelectCandidate(c)}
+                  className="text-left p-3 bg-ctp-mantle dark:bg-tn-bg-highlight rounded-lg hover:ring-2 hover:ring-tn-blue transition"
+                >
+                  <p className="text-sm font-bold text-ctp-text dark:text-tn-fg-bright">{c.name}</p>
+                  <p className="text-xs text-ctp-subtext dark:text-tn-fg-dark mt-0.5">{c.address}</p>
+                </button>
+              ))}
+            </div>
+            <button onClick={reset} className="text-xs text-ctp-overlay dark:text-tn-fg-dark mt-1">
+              해당 없음 — 다시 시도
+            </button>
+          </div>
+        )}
+
         {status === "error" && result && (
           <div className="bg-ctp-base dark:bg-tn-bg-card rounded-xl p-5 flex flex-col items-center gap-3">
             <div className="w-14 h-14 bg-red-100 dark:bg-tn-red/10 rounded-full flex items-center justify-center">

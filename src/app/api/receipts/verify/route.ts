@@ -55,9 +55,38 @@ export async function POST(req: NextRequest) {
   }
 
   if (!matchedRestaurant) {
+    // 카카오 키워드 검색으로 후보 찾기
+    const kakaoKey = process.env.KAKAO_REST_API_KEY;
+    let kakaoCandidates: any[] = [];
+    if (kakaoKey) {
+      // 첫 줄 (보통 상호명)로 검색
+      const searchName = lines[0]?.replace(/[()（）㈜㈱\-]/g, "").trim();
+      if (searchName && searchName.length >= 2) {
+        try {
+          const res = await fetch(
+            `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(searchName)}&category_group_code=FD6,CE7&size=3`,
+            { headers: { Authorization: `KakaoAK ${kakaoKey}` } }
+          );
+          if (res.ok) {
+            const data = await res.json();
+            kakaoCandidates = (data.documents || []).map((d: any) => ({
+              placeId: d.id,
+              name: d.place_name,
+              address: d.road_address_name || d.address_name,
+              category: d.category_group_code === "CE7" ? "cafe" : "korean",
+              lat: parseFloat(d.y),
+              lng: parseFloat(d.x),
+            }));
+          }
+        } catch {}
+      }
+    }
+
     return NextResponse.json({
       error: "매칭되는 식당을 찾을 수 없습니다",
       lines: lines.slice(0, 10),
+      kakaoCandidates,
+      needsRegistration: kakaoCandidates.length > 0,
     }, { status: 404 });
   }
 
