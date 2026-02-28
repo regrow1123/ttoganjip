@@ -10,7 +10,10 @@ import RestaurantDetail from "./RestaurantDetail";
 
 function LockedCard({ restaurant, onUnlock }: { restaurant: LockedRestaurant; onUnlock: (id: string) => void }) {
   return (
-    <div className="flex items-center gap-3 p-3 bg-white dark:bg-tn-bg-card border border-gray-100 dark:border-tn-border rounded-xl hover:border-orange-200 dark:hover:border-tn-orange transition">
+    <div
+      onClick={() => onUnlock(restaurant.id)}
+      className="flex items-center gap-3 p-3 bg-white dark:bg-tn-bg-card border border-gray-100 dark:border-tn-border rounded-xl hover:border-orange-200 dark:hover:border-tn-orange transition cursor-pointer"
+    >
       <div className="flex-shrink-0 w-10 h-10 bg-gray-100 dark:bg-tn-bg-highlight rounded-lg flex items-center justify-center">
         <span className="text-lg">🔒</span>
       </div>
@@ -26,12 +29,7 @@ function LockedCard({ restaurant, onUnlock }: { restaurant: LockedRestaurant; on
           <span className="text-xs font-semibold text-orange-500">🔥 {restaurant.revisitScore}회 재방문</span>
         </div>
       </div>
-      <button
-        onClick={() => onUnlock(restaurant.id)}
-        className="flex-shrink-0 text-[11px] bg-orange-500 text-white px-2.5 py-1 rounded-full hover:bg-orange-600 transition font-medium"
-      >
-        5P
-      </button>
+      <span className="flex-shrink-0 text-[10px] text-orange-500 font-medium">5P 열람</span>
     </div>
   );
 }
