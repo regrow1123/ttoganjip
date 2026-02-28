@@ -209,7 +209,7 @@ export default function RestaurantList() {
                     )}
                     {!r.locked && r.source && <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>}
                     <span className="text-[10px] text-gray-500 dark:text-tn-fg-dark">
-                      {r.category || "음식점"}
+                      {CATEGORY_LABELS[r.category as keyof typeof CATEGORY_LABELS] || r.category || "음식점"}
                     </span>
                     <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
                     <span className="text-[10px] font-semibold text-orange-500">🔥 {r.totalVisits}회</span>
