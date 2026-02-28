@@ -39,7 +39,8 @@ export async function GET(req: NextRequest) {
   });
 
   if (!res.ok) {
-    return NextResponse.json({ results: [] });
+    console.error("Kakao API error:", res.status, await res.text());
+    return NextResponse.json({ db: dbResults.length ? dbResults.map((r) => ({ ...r, inDb: true })) : [], kakao: [] });
   }
 
   const data = await res.json();
