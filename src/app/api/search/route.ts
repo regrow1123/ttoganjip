@@ -32,7 +32,6 @@ export async function GET(req: NextRequest) {
   // 2) 카카오 키워드 검색 (음식점 카테고리)
   const url = new URL("https://dapi.kakao.com/v2/local/search/keyword.json");
   url.searchParams.set("query", query);
-  url.searchParams.set("category_group_code", "FD6"); // 음식점
   url.searchParams.set("size", "10");
 
   const res = await fetch(url.toString(), {
