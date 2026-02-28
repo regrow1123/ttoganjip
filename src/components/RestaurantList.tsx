@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRestaurantStore, useUserStore } from "@/lib/store";
+import { useRestaurantStore, useUserStore, type SearchDbResult, type SearchKakaoResult } from "@/lib/store";
 import { unlockRestaurant } from "@/lib/api";
 import { CATEGORY_LABELS } from "@/types";
 import type { LockedRestaurant, UnlockedRestaurant } from "@/types";
@@ -70,7 +70,7 @@ function UnlockedCard({ restaurant, onClick, index }: { restaurant: UnlockedRest
 }
 
 export default function RestaurantList() {
-  const { restaurants, isLoading, setRestaurants, searchQuery, sortBy } = useRestaurantStore();
+  const { restaurants, isLoading, setRestaurants, searchQuery, sortBy, searchDbResults, searchKakaoResults, isSearching } = useRestaurantStore();
   const { userId, isLoggedIn, points, setPoints, login } = useUserStore();
   const [unlockTarget, setUnlockTarget] = useState<LockedRestaurant | null>(null);
   const { selectedId, setSelectedId } = useRestaurantStore();
@@ -126,6 +126,85 @@ export default function RestaurantList() {
     }
     return b.revisitScore - a.revisitScore;
   });
+
+  const SOURCE_LABEL: Record<string, string> = {
+    assembly: "🏛️",
+    seoul_expense: "🏙️",
+    user: "👤",
+  };
+
+  // 검색 API 결과 모드
+  const isApiSearchMode = searchQuery.length >= 2;
+
+  if (isApiSearchMode) {
+    if (isSearching) {
+      return (
+        <div className="flex items-center justify-center py-8">
+          <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-gray-400 dark:text-tn-fg-dark ml-2">검색 중...</span>
+        </div>
+      );
+    }
+
+    if (searchDbResults.length === 0 && searchKakaoResults.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 px-4">
+          <span className="text-3xl mb-2">🔍</span>
+          <p className="text-sm text-gray-400 dark:text-tn-fg-dark text-center">
+            &ldquo;{searchQuery}&rdquo; 검색 결과가 없어요.
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col gap-2 px-4 pb-4">
+        {searchDbResults.length > 0 && (
+          <>
+            <h2 className="text-xs font-semibold text-orange-500 py-1">🔥 또간집 등록 맛집 ({searchDbResults.length})</h2>
+            {searchDbResults.map((r) => (
+              <a
+                key={r.id}
+                href={r.placeUrl || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-tn-orange/10 border border-orange-100 dark:border-tn-orange/20 rounded-xl hover:border-orange-200 transition"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-900 dark:text-tn-fg-bright truncate">
+                    {SOURCE_LABEL[r.source] || ""} {r.name}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-tn-fg-dark truncate">{r.address}</p>
+                </div>
+                <span className="text-xs font-semibold text-orange-500 flex-shrink-0">🔥 {r.totalVisits}회</span>
+              </a>
+            ))}
+          </>
+        )}
+
+        {searchKakaoResults.length > 0 && (
+          <>
+            <h2 className="text-xs font-semibold text-gray-400 dark:text-tn-fg-dark py-1 mt-1">📍 카카오맵 검색 ({searchKakaoResults.length})</h2>
+            {searchKakaoResults.map((r) => (
+              <a
+                key={r.placeId}
+                href={r.placeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 bg-white dark:bg-tn-bg-card border border-gray-100 dark:border-tn-border rounded-xl hover:border-gray-200 transition"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-700 dark:text-tn-fg truncate">{r.name}</p>
+                  <p className="text-[10px] text-gray-400 dark:text-tn-fg-dark truncate">{r.address}</p>
+                </div>
+                <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark flex-shrink-0">카카오맵 →</span>
+              </a>
+            ))}
+          </>
+        )}
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

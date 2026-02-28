@@ -21,6 +21,26 @@ export const useMapStore = create<MapState>((set) => ({
 
 type SortBy = "revisit" | "name";
 
+export interface SearchDbResult {
+  id: string;
+  name: string;
+  address: string;
+  category: string;
+  source: string;
+  totalVisits: number;
+  placeUrl: string | null;
+  inDb: true;
+}
+
+export interface SearchKakaoResult {
+  placeId: string;
+  name: string;
+  address: string;
+  category: string;
+  placeUrl: string;
+  inDb: false;
+}
+
 interface RestaurantState {
   restaurants: Restaurant[];
   selectedId: string | null;
@@ -29,6 +49,9 @@ interface RestaurantState {
   searchQuery: string;
   sortBy: SortBy;
   isLoading: boolean;
+  searchDbResults: SearchDbResult[];
+  searchKakaoResults: SearchKakaoResult[];
+  isSearching: boolean;
   setRestaurants: (restaurants: Restaurant[]) => void;
   setSelectedId: (id: string | null) => void;
   setCategoryFilter: (category: Category | null) => void;
@@ -36,6 +59,8 @@ interface RestaurantState {
   setSearchQuery: (query: string) => void;
   setSortBy: (sort: SortBy) => void;
   setLoading: (loading: boolean) => void;
+  setSearchResults: (db: SearchDbResult[], kakao: SearchKakaoResult[]) => void;
+  setIsSearching: (v: boolean) => void;
 }
 
 export const useRestaurantStore = create<RestaurantState>((set) => ({
@@ -46,6 +71,9 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
   searchQuery: "",
   sortBy: "revisit",
   isLoading: false,
+  searchDbResults: [],
+  searchKakaoResults: [],
+  isSearching: false,
   setRestaurants: (restaurants) => set({ restaurants }),
   setSelectedId: (id) => set({ selectedId: id }),
   setCategoryFilter: (category) => set({ categoryFilter: category }),
@@ -53,6 +81,8 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
   setSearchQuery: (query) => set({ searchQuery: query }),
   setSortBy: (sort) => set({ sortBy: sort }),
   setLoading: (loading) => set({ isLoading: loading }),
+  setSearchResults: (db, kakao) => set({ searchDbResults: db, searchKakaoResults: kakao }),
+  setIsSearching: (v) => set({ isSearching: v }),
 }));
 
 interface UserState {
