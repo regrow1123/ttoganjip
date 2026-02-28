@@ -2,17 +2,7 @@
 
 import { useRestaurantStore } from "@/lib/store";
 import { CATEGORIES, CATEGORY_LABELS } from "@/types";
-import type { Category } from "@/types";
 
-const CATEGORY_EMOJI: Record<Category, string> = {
-  korean: "🍚",
-  chinese: "🥟",
-  japanese: "🍣",
-  western: "🍝",
-  cafe: "☕",
-  bar: "🍺",
-  other: "🍴",
-};
 
 export default function CategoryFilter() {
   const { categoryFilter, setCategoryFilter } = useRestaurantStore();
@@ -41,7 +31,7 @@ export default function CategoryFilter() {
               : "bg-ctp-mantle dark:bg-tn-bg-card text-ctp-subtext dark:text-tn-fg-dark hover:bg-ctp-surface0 dark:hover:bg-tn-bg-highlight"
           }`}
         >
-          {CATEGORY_EMOJI[cat]} {CATEGORY_LABELS[cat]}
+          {CATEGORY_LABELS[cat]}
         </button>
       ))}
     </div>
