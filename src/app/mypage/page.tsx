@@ -55,7 +55,7 @@ export default function MyPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-dvh">
-        <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-tn-blue border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -75,7 +75,7 @@ export default function MyPage() {
       {/* 프로필 카드 */}
       <div className="bg-white dark:bg-tn-bg-card m-4 p-5 rounded-2xl shadow-sm">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
             <span className="text-xl">👤</span>
           </div>
           <div>
@@ -85,8 +85,8 @@ export default function MyPage() {
         </div>
 
         <div className="grid grid-cols-3 gap-3">
-          <div className="text-center bg-orange-50 dark:bg-tn-orange/10 rounded-xl p-3">
-            <p className="text-lg font-bold text-orange-500">{data.user.points}</p>
+          <div className="text-center bg-blue-50 dark:bg-tn-blue/10 rounded-xl p-3">
+            <p className="text-lg font-bold text-tn-blue">{data.user.points}</p>
             <p className="text-[10px] text-gray-500 dark:text-tn-fg-dark">보유 포인트</p>
           </div>
           <div className="text-center bg-gray-50 dark:bg-tn-bg-highlight rounded-xl p-3">
@@ -110,7 +110,7 @@ export default function MyPage() {
               onClick={() => setMode(key)}
               className={`flex-1 py-2 text-xs font-medium rounded-lg transition ${
                 mode === key
-                  ? "bg-orange-500 text-white"
+                  ? "bg-tn-blue text-white"
                   : "bg-gray-100 dark:bg-tn-bg-highlight text-gray-600 dark:text-tn-fg-dark"
               }`}
             >
@@ -165,7 +165,7 @@ export default function MyPage() {
                         {r.category ? CATEGORY_LABELS[r.category] : "음식점"}
                       </span>
                       <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
-                      <span className="text-[10px] text-orange-500 font-medium">
+                      <span className="text-[10px] text-tn-blue font-medium">
                         🔥 {r.totalVisits}회
                       </span>
                     </div>

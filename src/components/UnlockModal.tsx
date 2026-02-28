@@ -47,7 +47,7 @@ export default function UnlockModal({
         {status === "confirm" && (
           <>
             <div className="flex flex-col items-center gap-3 mb-5">
-              <div className="w-14 h-14 bg-orange-100 dark:bg-tn-orange/10 rounded-full flex items-center justify-center">
+              <div className="w-14 h-14 bg-blue-100 dark:bg-tn-blue/10 rounded-full flex items-center justify-center">
                 <span className="text-2xl">🔓</span>
               </div>
               <h3 className="text-base font-bold text-gray-900 dark:text-tn-fg-bright">맛집 정보를 확인할까요?</h3>
@@ -57,7 +57,7 @@ export default function UnlockModal({
             </div>
             <div className="flex items-center justify-between bg-gray-50 dark:bg-tn-bg-highlight rounded-xl p-3 mb-4">
               <span className="text-sm text-gray-600 dark:text-tn-fg">차감 포인트</span>
-              <span className="text-sm font-bold text-orange-500">-5P</span>
+              <span className="text-sm font-bold text-tn-blue">-5P</span>
             </div>
             <div className="flex items-center justify-between px-1 mb-5">
               <span className="text-xs text-gray-400 dark:text-tn-fg-dark">보유 포인트</span>
@@ -73,7 +73,7 @@ export default function UnlockModal({
               <button
                 onClick={handleConfirm}
                 disabled={userPoints < 5}
-                className="flex-1 py-2.5 text-sm font-bold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-2.5 text-sm font-bold text-white bg-tn-blue rounded-xl hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {userPoints < 5 ? "포인트 부족" : "확인하기"}
               </button>
@@ -83,7 +83,7 @@ export default function UnlockModal({
 
         {status === "loading" && (
           <div className="flex flex-col items-center gap-3 py-8">
-            <div className="w-10 h-10 border-3 border-orange-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-10 h-10 border-3 border-tn-blue border-t-transparent rounded-full animate-spin" />
             <p className="text-sm text-gray-500 dark:text-tn-fg-dark dark:text-tn-fg-dark">맛집 정보를 가져오는 중...</p>
           </div>
         )}
@@ -97,7 +97,7 @@ export default function UnlockModal({
             <p className="text-xs text-gray-400 dark:text-tn-fg-dark">-5P 차감되었습니다</p>
             <button
               onClick={() => { onClose(); onSuccess?.(); }}
-              className="mt-2 w-full py-2.5 text-sm font-bold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition"
+              className="mt-2 w-full py-2.5 text-sm font-bold text-white bg-tn-blue rounded-xl hover:bg-blue-600 transition"
             >
               확인
             </button>

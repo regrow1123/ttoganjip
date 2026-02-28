@@ -14,7 +14,7 @@ export default function SourceTabs() {
           onClick={() => setSourceFilter(s)}
           className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-medium transition whitespace-nowrap ${
             sourceFilter === s
-              ? "bg-orange-500 text-white"
+              ? "bg-tn-blue text-white"
               : "bg-gray-100 dark:bg-tn-bg-card text-gray-600 dark:text-tn-fg-dark hover:bg-gray-200 dark:hover:bg-tn-bg-highlight"
           }`}
         >

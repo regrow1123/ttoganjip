@@ -99,8 +99,8 @@ export default function ReceiptPage() {
 
       <div className="p-4 flex flex-col gap-4 max-w-md mx-auto">
         {/* 안내 */}
-        <div className="bg-orange-50 dark:bg-tn-orange/10 rounded-xl p-4">
-          <h2 className="text-sm font-bold text-orange-600 dark:text-tn-orange mb-1">방문 인증하고 포인트 받기!</h2>
+        <div className="bg-blue-50 dark:bg-tn-blue/10 rounded-xl p-4">
+          <h2 className="text-sm font-bold text-tn-blue dark:text-tn-blue mb-1">방문 인증하고 포인트 받기!</h2>
           <p className="text-xs text-gray-500 dark:text-tn-fg-dark leading-relaxed">
             식당 영수증을 촬영하면 자동으로 식당을 인식해요.<br />
             첫 방문 <b>+10P</b>, 재방문 <b>+20P</b>!
@@ -111,7 +111,7 @@ export default function ReceiptPage() {
         <div
           onClick={() => status === "idle" && fileRef.current?.click()}
           className={`bg-white dark:bg-tn-bg-card border-2 border-dashed border-gray-200 dark:border-tn-border rounded-xl p-8 flex flex-col items-center gap-3 transition ${
-            status === "idle" ? "cursor-pointer hover:border-orange-300" : ""
+            status === "idle" ? "cursor-pointer hover:border-tn-blue" : ""
           }`}
         >
           {preview ? (
@@ -138,7 +138,7 @@ export default function ReceiptPage() {
 
         {/* 인증 버튼 */}
         {preview && status === "idle" && (
-          <button onClick={handleVerify} className="w-full py-3 text-sm font-bold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition">
+          <button onClick={handleVerify} className="w-full py-3 text-sm font-bold text-white bg-tn-blue rounded-xl hover:bg-blue-600 transition">
             🔍 영수증 인증하기
           </button>
         )}
@@ -146,10 +146,10 @@ export default function ReceiptPage() {
         {/* OCR 진행 */}
         {status === "ocr" && (
           <div className="flex flex-col items-center gap-3 py-6">
-            <div className="w-8 h-8 border-3 border-orange-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-3 border-tn-blue border-t-transparent rounded-full animate-spin" />
             <p className="text-sm text-gray-500 dark:text-tn-fg-dark">영수증 텍스트 인식 중... {ocrProgress}%</p>
             <div className="w-full bg-gray-200 dark:bg-tn-bg-highlight rounded-full h-1.5">
-              <div className="bg-orange-500 h-1.5 rounded-full transition-all" style={{ width: `${ocrProgress}%` }} />
+              <div className="bg-tn-blue h-1.5 rounded-full transition-all" style={{ width: `${ocrProgress}%` }} />
             </div>
           </div>
         )}
@@ -157,7 +157,7 @@ export default function ReceiptPage() {
         {/* 매칭 중 */}
         {status === "matching" && (
           <div className="flex flex-col items-center gap-3 py-6">
-            <div className="w-8 h-8 border-3 border-orange-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-3 border-tn-blue border-t-transparent rounded-full animate-spin" />
             <p className="text-sm text-gray-500 dark:text-tn-fg-dark">식당 매칭 중...</p>
           </div>
         )}
@@ -170,18 +170,18 @@ export default function ReceiptPage() {
             </div>
             <h3 className="text-base font-bold text-gray-900 dark:text-tn-fg-bright">인증 성공!</h3>
             <p className="text-sm text-gray-600 dark:text-tn-fg">
-              <span className="font-bold text-orange-500">{result.restaurant}</span>
+              <span className="font-bold text-tn-blue">{result.restaurant}</span>
               {result.isFirstVisit ? " 첫 방문" : " 재방문"}
             </p>
-            <div className="bg-orange-50 dark:bg-tn-orange/10 rounded-lg px-4 py-2">
-              <span className="text-lg font-bold text-orange-500">+{result.pointsEarned}P</span>
+            <div className="bg-blue-50 dark:bg-tn-blue/10 rounded-lg px-4 py-2">
+              <span className="text-lg font-bold text-tn-blue">+{result.pointsEarned}P</span>
             </div>
             <p className="text-xs text-gray-400 dark:text-tn-fg-dark">보유 포인트: {result.totalPoints}P</p>
             <div className="flex gap-2 w-full mt-2">
               <button onClick={reset} className="flex-1 py-2.5 text-sm font-medium text-gray-600 dark:text-tn-fg bg-gray-100 dark:bg-tn-bg-highlight rounded-xl">
                 추가 인증
               </button>
-              <button onClick={() => router.push("/")} className="flex-1 py-2.5 text-sm font-bold text-white bg-orange-500 rounded-xl">
+              <button onClick={() => router.push("/")} className="flex-1 py-2.5 text-sm font-bold text-white bg-tn-blue rounded-xl">
                 홈으로
               </button>
             </div>

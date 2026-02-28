@@ -12,7 +12,7 @@ function LockedCard({ restaurant, onUnlock }: { restaurant: LockedRestaurant; on
   return (
     <div
       onClick={() => onUnlock(restaurant.id)}
-      className="flex items-center gap-3 p-3 bg-white dark:bg-tn-bg-card border border-gray-100 dark:border-tn-border rounded-xl hover:border-orange-200 dark:hover:border-tn-orange transition cursor-pointer"
+      className="flex items-center gap-3 p-3 bg-white dark:bg-tn-bg-card border border-gray-100 dark:border-tn-border rounded-xl hover:border-tn-blue dark:hover:border-tn-blue transition cursor-pointer"
     >
       <div className="flex-shrink-0 w-7 h-7 bg-gray-300 dark:bg-tn-fg-dark rounded-full flex items-center justify-center">
         <span className="text-[10px]">🔒</span>
@@ -26,10 +26,10 @@ function LockedCard({ restaurant, onUnlock }: { restaurant: LockedRestaurant; on
           <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
           <span className="text-[10px] text-gray-400 dark:text-tn-fg-dark">{restaurant.areaHint}</span>
           <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
-          <span className="text-[10px] font-semibold text-orange-500">🔥 {restaurant.revisitScore}회</span>
+          <span className="text-[10px] font-semibold text-tn-blue">🔥 {restaurant.revisitScore}회</span>
         </div>
       </div>
-      <span className="flex-shrink-0 text-[10px] text-orange-500 font-medium">5P 열람</span>
+      <span className="flex-shrink-0 text-[10px] text-tn-blue font-medium">5P 열람</span>
     </div>
   );
 }
@@ -42,7 +42,7 @@ const SOURCE_BADGE: Record<string, string> = {
 
 function UnlockedCard({ restaurant, onClick, index }: { restaurant: UnlockedRestaurant; onClick: () => void; index: number }) {
   return (
-    <div onClick={onClick} className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-tn-orange/10 border border-orange-100 dark:border-tn-orange/20 rounded-xl cursor-pointer hover:border-orange-200 dark:hover:border-orange-700 transition">
+    <div onClick={onClick} className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-tn-blue/10 border border-blue-100 dark:border-tn-blue/20 rounded-xl cursor-pointer hover:border-tn-blue dark:hover:border-blue-700 transition">
       <div className="flex-shrink-0 w-7 h-7 bg-[#FF6B35] rounded-full flex items-center justify-center">
         <span className="text-xs font-bold text-white">{index}</span>
       </div>
@@ -59,7 +59,7 @@ function UnlockedCard({ restaurant, onClick, index }: { restaurant: UnlockedRest
             {restaurant.category ? CATEGORY_LABELS[restaurant.category] : "음식점"}
           </span>
           <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
-          <span className="text-[10px] font-semibold text-orange-500">🔥 {restaurant.revisitScore}회</span>
+          <span className="text-[10px] font-semibold text-tn-blue">🔥 {restaurant.revisitScore}회</span>
         </div>
         <p className="text-[10px] text-gray-400 dark:text-tn-fg-dark truncate mt-0.5">{restaurant.address}</p>
       </div>
@@ -150,7 +150,7 @@ export default function RestaurantList() {
     if (isSearching) {
       return (
         <div className="flex items-center justify-center py-8">
-          <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-tn-blue border-t-transparent rounded-full animate-spin" />
           <span className="text-sm text-gray-400 dark:text-tn-fg-dark ml-2">검색 중...</span>
         </div>
       );
@@ -171,7 +171,7 @@ export default function RestaurantList() {
       <div className="flex flex-col gap-2 px-4 pb-4">
         {searchDbResults.length > 0 && (
           <>
-            <h2 className="text-xs font-semibold text-orange-500 py-1">🔥 또간집 등록 맛집 ({searchDbResults.length})</h2>
+            <h2 className="text-xs font-semibold text-tn-blue py-1">🔥 또간집 등록 맛집 ({searchDbResults.length})</h2>
             {searchDbResults.map((r, idx) => (
               <div
                 key={r.id}
@@ -187,7 +187,7 @@ export default function RestaurantList() {
                 className={`flex items-center gap-3 p-3 rounded-xl transition ${
                   r.locked
                     ? "bg-white dark:bg-tn-bg-card border border-gray-100 dark:border-tn-border"
-                    : "bg-orange-50 dark:bg-tn-orange/10 border border-orange-100 dark:border-tn-orange/20 hover:border-orange-200 cursor-pointer"
+                    : "bg-blue-50 dark:bg-tn-blue/10 border border-blue-100 dark:border-tn-blue/20 hover:border-tn-blue cursor-pointer"
                 }`}
               >
                 <div className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${
@@ -212,11 +212,11 @@ export default function RestaurantList() {
                       {CATEGORY_LABELS[r.category as keyof typeof CATEGORY_LABELS] || r.category || "음식점"}
                     </span>
                     <span className="text-[10px] text-gray-300 dark:text-tn-fg-dark">•</span>
-                    <span className="text-[10px] font-semibold text-orange-500">🔥 {r.totalVisits}회</span>
+                    <span className="text-[10px] font-semibold text-tn-blue">🔥 {r.totalVisits}회</span>
                   </div>
                   <p className="text-[10px] text-gray-400 dark:text-tn-fg-dark truncate mt-0.5">{r.address}</p>
                 </div>
-                {r.locked && <span className="flex-shrink-0 text-[10px] text-orange-500 font-medium">5P 열람</span>}
+                {r.locked && <span className="flex-shrink-0 text-[10px] text-tn-blue font-medium">5P 열람</span>}
               </div>
             ))}
           </>
@@ -254,7 +254,7 @@ export default function RestaurantList() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-5 h-5 border-2 border-tn-blue border-t-transparent rounded-full animate-spin" />
         <span className="text-sm text-gray-400 dark:text-tn-fg-dark ml-2">로딩 중...</span>
       </div>
     );

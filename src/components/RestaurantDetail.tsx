@@ -69,7 +69,7 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
         <div className="flex-1 overflow-y-auto p-4">
           {loading && (
             <div className="flex items-center justify-center py-12">
-              <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-tn-blue border-t-transparent rounded-full animate-spin" />
             </div>
           )}
 
@@ -82,7 +82,7 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
                 <p className="text-sm text-gray-500 dark:text-tn-fg-dark mb-1">
                   {data.category ? CATEGORY_LABELS[data.category] : "음식점"} · {data.region || "서울"}
                 </p>
-                <p className="text-lg font-bold text-orange-500">🔥 {data.totalVisits}회 재방문</p>
+                <p className="text-lg font-bold text-tn-blue">🔥 {data.totalVisits}회 재방문</p>
               </div>
               <p className="text-xs text-gray-400 dark:text-tn-fg-dark text-center">
                 잠금을 해제하면 상호명, 주소, 상세 정보를 확인할 수 있어요
@@ -96,7 +96,7 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   {data.source && (
-                    <span className="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded-full font-medium">
+                    <span className="text-[10px] bg-blue-50 text-tn-blue px-2 py-0.5 rounded-full font-medium">
                       {SOURCE_LABEL[data.source] || data.source}
                     </span>
                   )}
@@ -107,7 +107,7 @@ export default function RestaurantDetail({ restaurantId, onClose }: RestaurantDe
                   )}
                 </div>
                 <p className="text-sm text-gray-600 dark:text-tn-fg">{data.address}</p>
-                <p className="text-base font-bold text-orange-500">🔥 {data.totalVisits}회 재방문</p>
+                <p className="text-base font-bold text-tn-blue">🔥 {data.totalVisits}회 재방문</p>
               </div>
 
               {/* 카카오맵 버튼 */}

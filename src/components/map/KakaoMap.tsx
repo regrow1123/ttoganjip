@@ -54,7 +54,7 @@ export default function KakaoMap() {
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
           ">
             <div style="
-              background: #FF6B35;
+              background: #7aa2f7;
               color: white;
               width: 30px;
               height: 30px;

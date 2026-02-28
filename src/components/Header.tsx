@@ -24,12 +24,12 @@ export default function Header() {
       <div className="flex items-center gap-2">
         {isLoggedIn ? (
           <>
-            <span className="text-xs font-semibold text-orange-500 bg-orange-50 dark:bg-tn-orange/10 px-2 py-1 rounded-full">
+            <span className="text-xs font-semibold text-tn-blue bg-blue-50 dark:bg-tn-blue/10 px-2 py-1 rounded-full">
               {points}P
             </span>
             <button
               onClick={() => router.push("/receipt")}
-              className="text-xs bg-orange-500 text-white px-3 py-1.5 rounded-full hover:bg-orange-600 transition font-medium"
+              className="text-xs bg-tn-blue text-white px-3 py-1.5 rounded-full hover:bg-blue-600 transition font-medium"
             >
               📸
             </button>
@@ -43,7 +43,7 @@ export default function Header() {
         ) : (
           <button
             onClick={login}
-            className="text-xs bg-orange-500 text-white px-3 py-1.5 rounded-full hover:bg-orange-600 transition font-medium"
+            className="text-xs bg-tn-blue text-white px-3 py-1.5 rounded-full hover:bg-blue-600 transition font-medium"
           >
             로그인
           </button>
