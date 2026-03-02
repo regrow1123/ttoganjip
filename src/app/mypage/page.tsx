@@ -40,7 +40,7 @@ interface MyPageData {
     category: Category;
     region: string;
   }[];
-  pointHistory: { amount: number; type: string; createdAt: string }[];
+  pointHistory: { amount: number; type: string; created_at: string }[];
 }
 
 export default function MyPage() {
@@ -247,7 +247,7 @@ export default function MyPage() {
                       {POINT_TYPE_LABELS[p.type] || p.type}
                     </p>
                     <p className="text-[10px] text-ctp-overlay dark:text-tn-fg-dark">
-                      {new Date(p.createdAt).toLocaleDateString("ko-KR")}
+                      {new Date(p.created_at).toLocaleDateString("ko-KR")}
                     </p>
                   </div>
                   <span
